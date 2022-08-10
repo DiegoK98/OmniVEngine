@@ -11,6 +11,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <pugixml.hpp>
 
 // std
 #include <array>
@@ -26,8 +27,6 @@ namespace OmniV {
 			.setMaxSets(OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
-
-		loadGameObjects();
 	}
 
 	OmniVEngineApp::~OmniVEngineApp() {}
@@ -118,45 +117,67 @@ namespace OmniV {
 		vkDeviceWaitIdle(omnivDevice.device());
 	}
 
-	void OmniVEngineApp::loadGameObjects() {
-		std::shared_ptr<OmniVModel> omnivModel = OmniVModel::createModelFromFile(omnivDevice, "flat_vase.obj");
+	void OmniVEngineApp::loadScene(const std::string& sceneFile) {
+		std::string scenePath = "../scenes/" + sceneFile;
 
-		auto flatVase = OmniVGameObject::createGameObject();
-		flatVase.model = omnivModel;
-		flatVase.transform.translation = { -.5f, .5f, 0.f };
-		flatVase.transform.scale = { 3.f, 1.5f, 3.f };
-		gameObjects.emplace(flatVase.getId(), std::move(flatVase));
+		pugi::xml_document doc;
+		pugi::xml_parse_result result = doc.load_file(scenePath.c_str());
 
-		omnivModel = OmniVModel::createModelFromFile(omnivDevice, "smooth_vase.obj");
+		if (!result)
+			throw std::runtime_error("Error while parsing " + sceneFile);
 
-		auto smoothVase = OmniVGameObject::createGameObject();
-		smoothVase.model = omnivModel;
-		smoothVase.transform.translation = { .5f, .5f, 2.5f };
-		smoothVase.transform.scale = { 3.f, 1.5f, 3.f };
-		gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
+		size_t count = std::distance(doc.children("scene").begin(), doc.children("scene").end());
 
-		omnivModel = OmniVModel::createModelFromFile(omnivDevice, "quad.obj");
-		auto floor = OmniVGameObject::createGameObject();
-		floor.model = omnivModel;
-		floor.transform.translation = { 0.f, .5f, 0.f };
-		floor.transform.scale = { 3.f, 1.f, 3.f };
-		gameObjects.emplace(floor.getId(), std::move(floor));
+		if (count == 0)
+			throw std::runtime_error("No scene node");
 
-		std::vector<glm::vec3> lightColors{
-			{1.f, .1f, .1f},
-			{.1f, .1f, 1.f},
-			{.1f, 1.f, .1f},
-			{1.f, 1.f, .1f},
-			{.1f, 1.f, 1.f},
-			{1.f, 1.f, 1.f}
-		};
+		auto scene_node = doc.child("scene");
+		// Create scene object
 
-		for (int i = 0; i < lightColors.size(); i++) {
-			auto pointLight = OmniVGameObject::makePointLight(0.2f);
-			pointLight.color = lightColors[i];
-			auto rotateLight = glm::rotate(glm::mat4(1.f), (i * glm::two_pi<float>()) / lightColors.size(), { 0.f, -1.f, 0.f });
-			pointLight.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.f, -1.f, -1.f, 1.f));
-			gameObjects.emplace(pointLight.getId(), std::move(pointLight));
+		// Camera parsing
+		/*count = std::distance(scene_node.children("camera").begin(), scene_node.children("camera").end());
+
+		if (count == 0)
+			throw std::runtime_error("No camera node");
+
+		// Create camera object and add to scene*/
+
+		uint32_t entity_id = 0;
+		std::shared_ptr<OmniVModel> omnivModel;
+
+		// GameObjects parsing
+		for (pugi::xml_node node = scene_node.child("mesh"); node; node = node.next_sibling("mesh"))
+		{
+			if (!node.attribute("type"))
+				throw std::runtime_error("Node without type attribute");
+
+			if (strcmp(node.attribute("type").value(), "obj") == 0)
+			{
+				if (!node.find_child_by_attribute("name", "filename"))
+					throw std::runtime_error("Obj no defined");
+
+				auto gameObject = OmniVGameObject::createGameObject();
+
+				std::string objPath = node.find_child_by_attribute("name", "filename").attribute("value").value();
+				omnivModel = OmniVModel::createModelFromFile(omnivDevice, objPath);
+				gameObject.model = omnivModel;
+				gameObject.transform.initializeFromNode(node.child("transform"));
+
+				gameObjects.emplace(gameObject.getId(), std::move(gameObject));
+			}
+
+			// assert that gameObjects size is not more than MAX_NUMBER_OF_OBJECTS
+		}
+
+		// Lights parsing
+		for (pugi::xml_node node = scene_node.child("light"); node; node = node.next_sibling("light"))
+		{
+			auto lightGameObject = OmniVGameObject::makeLightFromNode(node);
+			lightGameObject.transform.initializeFromNode(node.child("transform"));
+
+			gameObjects.emplace(lightGameObject.getId(), std::move(lightGameObject));
+
+			// assert that gameObjects size is not more than MAX_NUMBER_OF_OBJECTS
 		}
 	}
 }

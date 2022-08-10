@@ -6,9 +6,22 @@
 #include <stdexcept>
 
 int main(int argc, char* argv[]) {
+	if (argc > 2)
+	{
+		std::cerr << "Invalid number of arguments" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	std::string sceneFile;
+	if (argc != 1)
+		sceneFile = std::string(argv[1]);
+	else
+		sceneFile = "bunny.xml"; // Default scene to load if no argument given
+
 	OmniV::OmniVEngineApp app{};
 
 	try {
+		app.loadScene(sceneFile);
 		app.run();
 	}
 	catch (const std::exception& e) {

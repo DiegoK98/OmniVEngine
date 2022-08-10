@@ -1,0 +1,19 @@
+<scene>
+	<mesh type="obj">
+		<string name="filename" value="bunny.obj"/>
+	</mesh>
+
+	<!--<light type="ambient">
+		<radiance value="1 1 1"/>
+		<intensity value="0.02"/>
+	</light>-->
+
+
+  <light type="point">
+    <transform>
+			<position value="0.0 3.0 3.0"/>
+    </transform>
+		<radiance name="radiance" value="0.8 0.2 0.2"/>
+	</light>
+  
+</scene>

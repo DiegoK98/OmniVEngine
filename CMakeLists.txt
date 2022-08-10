@@ -7,7 +7,7 @@ set(NAME OmniV)
 
 set(GLFW_PATH libs/glfw)
 set(GLM_PATH libs/glm)
-set(PUGIXML_PATH libs/pugixml/src)
+set(PUGIXML_PATH libs/pugixml)
 
 message(STATUS "using ${CMAKE_GENERATOR}")
 if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
@@ -40,7 +40,7 @@ endif()
 # 2. Set GLFW_PATH in .env.cmake to target specific glfw
 # or try fetching from git repo
 if (DEFINED GLFW_PATH)
-  message(STATUS "Using GLFW path specified in .env")
+  message(STATUS "Using GLFW path specified")
   set(GLFW_INCLUDE_DIRS "${GLFW_PATH}/include")
   if (MSVC)
     set(GLFW_LIB "${GLFW_PATH}/lib-vc2022") # 2.1 Update lib-vc2019 to use same version as your visual studio
@@ -57,6 +57,17 @@ if (NOT GLFW_LIB)
 	message(FATAL_ERROR "Could not find glfw library!")
 else()
 	message(STATUS "Using glfw lib at: ${GLFW_LIB}")
+endif()
+
+# PugiXML
+if (DEFINED PUGIXML_PATH)
+  message(STATUS "Using PUGIXML path specified")
+  set(PUGIXML_INCLUDE_DIRS "${PUGIXML_PATH}/src")
+  if (MSVC)
+    set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2022/x64_Release")
+  endif()
+else()
+  message(FATAL_ERROR "Could not find pugixml library!")
 endif()
 
 include_directories(libs)
@@ -92,16 +103,17 @@ if (WIN32)
     ${Vulkan_INCLUDE_DIRS}
     ${TINYOBJ_PATH}
     ${GLFW_INCLUDE_DIRS}
+    ${PUGIXML_INCLUDE_DIRS}
     ${GLM_PATH}
-    ${PUGIXML_PATH}
     )
 
   target_link_directories(${PROJECT_NAME} PUBLIC
     ${Vulkan_LIBRARIES}
     ${GLFW_LIB}
+    ${PUGIXML_LIB}
   )
 
-  target_link_libraries(${PROJECT_NAME} glfw3 vulkan-1)
+  target_link_libraries(${PROJECT_NAME} glfw3 pugixml vulkan-1)
 elseif (UNIX)
     message(STATUS "CREATING BUILD FOR UNIX")
     target_include_directories(${PROJECT_NAME} PUBLIC

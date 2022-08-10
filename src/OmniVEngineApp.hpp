@@ -23,6 +23,7 @@ namespace OmniV {
 		OmniVEngineApp(const OmniVEngineApp&) = delete;
 		OmniVEngineApp& operator=(const OmniVEngineApp&) = delete;
 
+		void loadScene(const std::string& i_path);
 		void run();
 
 	private:
@@ -33,8 +34,6 @@ namespace OmniV {
 		// Note: Order of declarations matters -> We want the DescriptorPool object to be destroyed before the Device object
 		// (objects are created in declaration order & destroyed in reverse declaration order)
 		std::unique_ptr<OmniVDescriptorPool> globalPool{};
-		OmniVGameObject::Map gameObjects;
-
-		void loadGameObjects();
+		OmniVGameObject::Map gameObjects; // Should be part of a scene object
 	};
 }

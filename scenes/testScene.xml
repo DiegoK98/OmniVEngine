@@ -1,0 +1,79 @@
+<scene>
+  
+  <!--Meshes-->
+  
+  <mesh type="obj">
+    <string name="filename" value="flat_vase.obj"/>
+    <transform>
+      <position value="-0.5 0.5 0.0"/>
+      <scale value="3.0 1.5 3.0"/>
+    </transform>
+  </mesh>
+
+  <mesh type="obj">
+    <string name="filename" value="smooth_vase.obj"/>
+    <transform>
+      <position value="0.5 0.5 2.5"/>
+      <scale value="3.0 1.5 3.0"/>
+    </transform>
+  </mesh>
+
+  <mesh type="obj">
+    <string name="filename" value="quad.obj"/>
+    <transform>
+      <position value="0.0 0.5 0.0"/>
+      <scale value="3.0 1.0 3.0"/>
+    </transform>
+  </mesh>
+
+  <!--Lights-->
+  
+  <light type="point">
+    <radiance name="radiance" value="1.0 0.1 0.1"/>
+    <intensity name="intensity" value="0.2"/>
+    <transform>
+			<position value="-1.0 -1.0 -1.0"/>
+    </transform>
+	</light>
+
+  <light type="point">
+    <radiance name="radiance" value="0.1 0.1 1.0"/>
+    <intensity name="intensity" value="0.2"/>
+    <transform>
+      <position value="0.366 -1.0 -1.366"/>
+    </transform>
+  </light>
+
+  <light type="point">
+    <radiance name="radiance" value="0.1 1.0 0.1"/>
+    <intensity name="intensity" value="0.2"/>
+    <transform>
+      <position value="1.366 -1.0 -0.366"/>
+    </transform>
+  </light>
+
+  <light type="point">
+    <radiance name="radiance" value="1.0 1.0 0.1"/>
+    <intensity name="intensity" value="0.2"/>
+    <transform>
+      <position value="1.0 -1.0 1.0"/>
+    </transform>
+  </light>
+
+  <light type="point">
+    <radiance name="radiance" value="0.1 1.0 1.0"/>
+    <intensity name="intensity" value="0.2"/>
+    <transform>
+      <position value="-0.366 -1.0 1.366"/>
+    </transform>
+  </light>
+
+  <light type="point">
+    <radiance name="radiance" value="1.0 1.0 1.0"/>
+    <intensity name="intensity" value="0.2"/>
+    <transform>
+      <position value="-1.366 -1.0 0.366"/>
+    </transform>
+  </light>
+  
+</scene>

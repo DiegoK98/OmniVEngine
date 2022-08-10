@@ -1,9 +1,11 @@
 ﻿#pragma once
 
+#include "common.hpp"
 #include "OmniVModel.hpp"
 
 // libs
 #include <glm/gtc/matrix_transform.hpp>
+#include <pugixml.hpp>
 
 // std
 #include <memory>
@@ -22,6 +24,8 @@ namespace OmniV {
         glm::mat4 mat4();
 
         glm::mat3 normalMatrix();
+
+        void initializeFromNode(pugi::xml_node transformNode);
     };
 
     struct PointLightComponent {
@@ -38,7 +42,8 @@ namespace OmniV {
             return OmniVGameObject{ currentId++ };
         }
 
-        static OmniVGameObject makePointLight(float intensity = 10.f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.f));
+        static OmniVGameObject makeSimplePointLight(glm::vec3 color = glm::vec3(1.f), float intensity = 10.f, float radius = 0.1f);
+        static OmniVGameObject makeLightFromNode(pugi::xml_node lightNode);
 
         OmniVGameObject(const OmniVGameObject&) = delete;
         OmniVGameObject& operator=(const OmniVGameObject&) = delete;
