@@ -19,9 +19,4 @@ namespace OmniV
     Vector2f toVector2f(const std::string& str);
 
     Vector3f toVector3f(const std::string& str);
-
-    inline float radToDeg(float value) { return value * (180.0f / kPI); }
-
-    /// Convert degrees to radians
-    inline float degToRad(float value) { return value * (kPI / 180.0f); }
 }

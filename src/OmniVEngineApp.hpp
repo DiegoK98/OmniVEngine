@@ -5,6 +5,7 @@
 #include "OmniVGameObject.hpp"
 #include "OmniVWindow.hpp"
 #include "OmniVRenderer.hpp"
+#include "OmniVCamera.hpp"
 
 // std
 #include <memory>
@@ -35,5 +36,7 @@ namespace OmniV {
 		// (objects are created in declaration order & destroyed in reverse declaration order)
 		std::unique_ptr<OmniVDescriptorPool> globalPool{};
 		OmniVGameObject::Map gameObjects; // Should be part of a scene object
+
+		OmniVCamera camera{};
 	};
 }

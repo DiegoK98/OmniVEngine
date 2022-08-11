@@ -19,7 +19,7 @@ namespace OmniV {
             int lookDown = GLFW_KEY_DOWN;
         };
 
-        void moveInPlaneXZ(GLFWwindow* window, float dt, OmniVGameObject& gameObject);
+        void moveInPlaneXZ(GLFWwindow* window, float dt, TransformComponent& transformComponent);
 
         KeyMappings keys{};
         float moveSpeed{ 3.f };

@@ -77,10 +77,10 @@ namespace OmniV {
             assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
 
             // update light position
-            obj.transform.translation = glm::vec3(rotateLight * glm::vec4(obj.transform.translation, 1.f));
+            obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
 
             // copy light to ubo
-            ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.translation, 1.f);
+            ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.position, 1.f);
             ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
 
             lightIndex += 1;
@@ -97,7 +97,7 @@ namespace OmniV {
             if (obj.pointLight == nullptr) continue;
 
             // calculate distance
-            auto offset = frameInfo.camera.getPosition() - obj.transform.translation;
+            auto offset = frameInfo.camera.getPosition() - obj.transform.position;
             float disSquared = glm::dot(offset, offset);
             sorted[disSquared] = obj.getId();
         }
@@ -120,7 +120,7 @@ namespace OmniV {
             auto& obj = frameInfo.gameObjects.at(it->second);
 
             PointLightPushConstants push{};
-            push.position = glm::vec4(obj.transform.translation, 1.f);
+            push.position = glm::vec4(obj.transform.position, 1.f);
             push.color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
             push.radius = obj.transform.scale.x;
 

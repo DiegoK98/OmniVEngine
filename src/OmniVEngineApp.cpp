@@ -2,7 +2,6 @@
 #include "OmniVBuffer.hpp"
 #include "OmniVKeyboardMovementController.hpp"
 #include "OmniVFrameInfo.hpp"
-#include "OmniVCamera.hpp"
 #include "RenderSystems/OmniVSimpleRenderSystem.hpp"
 #include "RenderSystems/OmniVPointLightRenderSystem.hpp"
 
@@ -61,13 +60,8 @@ namespace OmniV {
 		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 
-		// Create Game Objects
-		auto viewerObject = OmniVGameObject::createGameObject();
-		viewerObject.transform.translation.z = -2.5f;
-
-		// Create camera and controller
-		OmniVCamera camera{};
-		OmniVKeyboardMovementController cameraController{};
+		// Create player controller
+		OmniVKeyboardMovementController viewerController{};
 
 		// Main loop
 		auto currentTime = std::chrono::high_resolution_clock::now();
@@ -80,13 +74,11 @@ namespace OmniV {
 			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
 			currentTime = newTime;
 
-			// View Matrix update (Player movement & rotation)
-			cameraController.moveInPlaneXZ(omnivWindow.getGLFWwindow(), frameTime, viewerObject);
-			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+			// Player movement & rotation
+			viewerController.moveInPlaneXZ(omnivWindow.getGLFWwindow(), frameTime, camera.viewerGameObject.transform);
 
-			// Projection Matrix update (aspect-ratio)
-			float aspect = omnivRenderer.getAspectRatio();
-			camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);
+			// Update camera matrices (View & Projection)
+			camera.updateMatricesValues(omnivRenderer.getAspectRatio());
 
 			// Frame
 			if (auto commandBuffer = omnivRenderer.beginFrame()) {
@@ -132,15 +124,15 @@ namespace OmniV {
 			throw std::runtime_error("No scene node");
 
 		auto scene_node = doc.child("scene");
-		// Create scene object
+		/* Create scene object */
 
 		// Camera parsing
-		/*count = std::distance(scene_node.children("camera").begin(), scene_node.children("camera").end());
+		count = std::distance(scene_node.children("camera").begin(), scene_node.children("camera").end());
 
 		if (count == 0)
 			throw std::runtime_error("No camera node");
 
-		// Create camera object and add to scene*/
+		camera = OmniVCamera::makeCameraFromNode(scene_node.child("camera"));
 
 		uint32_t entity_id = 0;
 		std::shared_ptr<OmniVModel> omnivModel;

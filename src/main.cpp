@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
 	if (argc != 1)
 		sceneFile = std::string(argv[1]);
 	else
-		sceneFile = "bunny.xml"; // Default scene to load if no argument given
+		sceneFile = "testScene.xml"; // Default scene to load if no argument given
 
 	OmniV::OmniVEngineApp app{};
 

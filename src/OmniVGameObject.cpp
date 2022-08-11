@@ -31,7 +31,7 @@ namespace OmniV {
 				scale.z * (c1 * c2),
 				0.0f,
 			},
-			{translation.x, translation.y, translation.z, 1.0f} };
+			{position.x, position.y, position.z, 1.0f} };
 	}
 
 	glm::mat3 TransformComponent::normalMatrix() {
@@ -75,6 +75,7 @@ namespace OmniV {
 
 			if (strcmp(it->name(), "rotation") == 0)
 			{
+				// Check for quaternions
 				if (it->attribute("value"))
 					rotation = toVector3f(it->attribute("eulerAngles").value());
 				else
@@ -84,7 +85,7 @@ namespace OmniV {
 			if (strcmp(it->name(), "position") == 0)
 			{
 				if (it->attribute("value"))
-					translation = toVector3f(it->attribute("value").value());
+					position = toVector3f(it->attribute("value").value());
 				else
 					throw std::runtime_error("Transform position malformed");
 			}
