@@ -86,16 +86,20 @@ namespace OmniV {
 				int frameIndex = omnivRenderer.getFrameIndex();
 				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], gameObjects };
 
-				// Global UBO update & upload
+				// Update matrices
 				GlobalUbo ubo{};
 				ubo.viewMat = camera.getView();
 				ubo.inverseViewMat = camera.getInverseView();
-				updatePointLights(frameInfo, ubo);
 				ubo.projMat = camera.getProjection();
+
+				// Update point lights
+				updatePointLights(frameInfo, ubo);
+
+				// Upload UBO
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
-				// RenderPass (Begin Pass -> Draw -> End Pass)
+				// RenderPass
 				omnivRenderer.beginSwapChainRenderPass(commandBuffer);
 
 				for (auto& system : renderSystems)
