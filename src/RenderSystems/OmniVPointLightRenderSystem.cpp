@@ -71,7 +71,7 @@ namespace OmniV {
 
 		for (auto& kv : frameInfo.gameObjects) {
 			auto& obj = kv.second;
-			if (obj.pointLight == nullptr) continue;
+			if (obj.pointLight == nullptr || !obj.pointLight->drawBillboard) continue;
 
 			// calculate distance
 			auto offset = frameInfo.camera.getPosition() - obj.transform.position;

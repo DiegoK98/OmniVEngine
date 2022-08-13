@@ -30,6 +30,7 @@ namespace OmniV {
 
     struct PointLightComponent {
         float lightIntensity = 1.0f;
+        bool drawBillboard = false;
     };
 
     class OmniVGameObject {
@@ -42,8 +43,8 @@ namespace OmniV {
             return OmniVGameObject{ currentId++ };
         }
 
-        static OmniVGameObject makeSimplePointLight(glm::vec3 color = glm::vec3(1.f), float intensity = 10.f, float radius = 0.1f);
-        static OmniVGameObject makeLightFromNode(pugi::xml_node lightNode);
+        static OmniVGameObject makeSimplePointLight(bool drawBillboard = false, glm::vec3 color = glm::vec3(1.f), float intensity = 10.f, float radius = 0.1f);
+        static OmniVGameObject makeLightFromNode(pugi::xml_node lightNode, bool drawBillboard);
 
         OmniVGameObject(const OmniVGameObject&) = delete;
         OmniVGameObject& operator=(const OmniVGameObject&) = delete;

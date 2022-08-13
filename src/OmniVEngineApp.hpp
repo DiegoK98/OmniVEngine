@@ -14,6 +14,16 @@
 
 namespace OmniV {
 
+	struct EnabledRenderSystems
+	{
+		bool simpleRenderSystemEnable = true; // Always enabled
+		bool pointLightRenderSystemEnable = false;
+
+		int getCount() {
+			return simpleRenderSystemEnable + pointLightRenderSystemEnable;
+		}
+	};
+
 	class OmniVEngineApp {
 	public:
 		static constexpr int WIDTH = 800;
@@ -31,7 +41,7 @@ namespace OmniV {
 	private:
 		OmniVWindow omnivWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		OmniVDevice omnivDevice{ omnivWindow };
-		OmniVRenderer omnivRenderer{omnivWindow, omnivDevice};
+		OmniVRenderer omnivRenderer{ omnivWindow, omnivDevice };
 
 		// Note: Order of declarations matters -> We want the DescriptorPool object to be destroyed before the Device object
 		// (objects are created in declaration order & destroyed in reverse declaration order)
@@ -39,6 +49,8 @@ namespace OmniV {
 		OmniVGameObject::Map gameObjects; // Should be part of a scene object
 
 		OmniVCamera camera{};
+
+		EnabledRenderSystems enabledSystems;
 
 		void updatePointLights(FrameInfo& frameInfo, GlobalUbo& ubo);
 	};

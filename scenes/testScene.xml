@@ -39,6 +39,7 @@
   <light type="point">
     <radiance name="radiance" value="1.0 0.1 0.1"/>
     <intensity name="intensity" value="0.2"/>
+    <billboard name="billboard" value="true"/>
     <transform>
       <position value="-1.0 -1.0 -1.0"/>
     </transform>
@@ -47,6 +48,7 @@
   <light type="point">
     <radiance name="radiance" value="0.1 0.1 1.0"/>
     <intensity name="intensity" value="0.2"/>
+    <billboard name="billboard" value="true"/>
     <transform>
       <position value="0.366 -1.0 -1.366"/>
     </transform>
@@ -55,6 +57,7 @@
   <light type="point">
     <radiance name="radiance" value="0.1 1.0 0.1"/>
     <intensity name="intensity" value="0.2"/>
+    <billboard name="billboard" value="true"/>
     <transform>
       <position value="1.366 -1.0 -0.366"/>
     </transform>
@@ -63,6 +66,7 @@
   <light type="point">
     <radiance name="radiance" value="1.0 1.0 0.1"/>
     <intensity name="intensity" value="0.2"/>
+    <billboard name="billboard" value="true"/>
     <transform>
       <position value="1.0 -1.0 1.0"/>
     </transform>
@@ -71,6 +75,7 @@
   <light type="point">
     <radiance name="radiance" value="0.1 1.0 1.0"/>
     <intensity name="intensity" value="0.2"/>
+    <billboard name="billboard" value="true"/>
     <transform>
       <position value="-0.366 -1.0 1.366"/>
     </transform>
@@ -79,6 +84,7 @@
   <light type="point">
     <radiance name="radiance" value="1.0 1.0 1.0"/>
     <intensity name="intensity" value="0.2"/>
+    <billboard name="billboard" value="true"/>
     <transform>
       <position value="-1.366 -1.0 0.366"/>
     </transform>

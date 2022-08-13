@@ -92,18 +92,19 @@ namespace OmniV {
 		}
 	}
 
-	OmniVGameObject OmniVGameObject::makeSimplePointLight(glm::vec3 color, float intensity, float radius) {
+	OmniVGameObject OmniVGameObject::makeSimplePointLight(bool drawBillboard, glm::vec3 color, float intensity, float radius) {
 		OmniVGameObject  gameObj = OmniVGameObject::createGameObject();
 
 		gameObj.color = color;
-		gameObj.transform.scale.x = radius;
 		gameObj.pointLight = std::make_unique<PointLightComponent>();
 		gameObj.pointLight->lightIntensity = intensity;
+		gameObj.pointLight->drawBillboard = drawBillboard;
+		gameObj.transform.scale.x = radius;
 
 		return gameObj;
 	}
 
-	OmniVGameObject OmniVGameObject::makeLightFromNode(pugi::xml_node lightNode) {
+	OmniVGameObject OmniVGameObject::makeLightFromNode(pugi::xml_node lightNode, bool drawBillboard) {
 		// Check for directional & ambient here
 
 		// Radiance
@@ -114,10 +115,10 @@ namespace OmniV {
 
 		// Intensity
 		if (!lightNode.find_child_by_attribute("name", "intensity"))
-			return makeSimplePointLight(m_radiance);
+			return makeSimplePointLight(drawBillboard, m_radiance);
 		
 		float m_intensity = toFloat(lightNode.find_child_by_attribute("name", "intensity").attribute("value").value());
 
-		return makeSimplePointLight(m_radiance, m_intensity);
+		return makeSimplePointLight(drawBillboard, m_radiance, m_intensity);
 	}
 }

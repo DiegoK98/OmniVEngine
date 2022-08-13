@@ -55,11 +55,15 @@ namespace OmniV {
 				.build(globalDescriptorSets[i]);
 		}
 
-		// Create Render Systems (pipelines)
-		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
-		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+		// Create Render Systems (pipelines). Should be more generalized, in a loop or something.
+		// Warning!!!: The RenderSystem objects are constructed even if the rendersystem is not enabled, which is really bad
+		OmniVRenderSystem* renderSystems[MAX_CONCURRENT_RENDER_SYSTEMS] = {};
 
-		OmniVRenderSystem* renderSystems[2] = { &simpleRenderSystem, &pointLightSystem };
+		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+		if (enabledSystems.simpleRenderSystemEnable) renderSystems[0] = &simpleRenderSystem;
+		
+		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+		if (enabledSystems.pointLightRenderSystemEnable) renderSystems[1] = &pointLightSystem;
 
 		// Create player controller
 		OmniVKeyboardMovementController viewerController{};
@@ -102,8 +106,8 @@ namespace OmniV {
 				// RenderPass
 				omnivRenderer.beginSwapChainRenderPass(commandBuffer);
 
-				for (auto& system : renderSystems)
-					system->render(frameInfo);
+				for (unsigned i = 0; i < enabledSystems.getCount(); i++)
+					renderSystems[i]->render(frameInfo);
 
 				omnivRenderer.endSwapChainRenderPass(commandBuffer);
 				omnivRenderer.endFrame();
@@ -169,10 +173,14 @@ namespace OmniV {
 		// Lights parsing
 		for (pugi::xml_node node = scene_node.child("light"); node; node = node.next_sibling("light"))
 		{
-			auto lightGameObject = OmniVGameObject::makeLightFromNode(node);
+			bool drawBillboard = node.child("billboard") ? toBool(node.find_child_by_attribute("name", "billboard").attribute("value").value()) : false;
+
+			auto lightGameObject = OmniVGameObject::makeLightFromNode(node, drawBillboard);
 			lightGameObject.transform.initializeFromNode(node.child("transform"));
 
 			gameObjects.emplace(lightGameObject.getId(), std::move(lightGameObject));
+
+			if (!enabledSystems.pointLightRenderSystemEnable) enabledSystems.pointLightRenderSystemEnable = drawBillboard;
 
 			// assert that gameObjects size is not more than MAX_NUMBER_OF_OBJECTS
 		}
@@ -187,6 +195,7 @@ namespace OmniV {
 			auto& obj = kv.second;
 			if (obj.pointLight == nullptr) continue;
 
+			// Maybe it would be better to just upload up to MAX_LIGHTS lights, ordering them by priority before uploading
 			assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
 
 			// update light position
