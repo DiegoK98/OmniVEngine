@@ -6,6 +6,7 @@
 #include "OmniVWindow.hpp"
 #include "OmniVRenderer.hpp"
 #include "OmniVCamera.hpp"
+#include "OmniVFrameInfo.hpp"
 
 // std
 #include <memory>
@@ -38,5 +39,7 @@ namespace OmniV {
 		OmniVGameObject::Map gameObjects; // Should be part of a scene object
 
 		OmniVCamera camera{};
+
+		void updatePointLights(FrameInfo& frameInfo, GlobalUbo& ubo);
 	};
 }

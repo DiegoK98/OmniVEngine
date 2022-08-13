@@ -38,7 +38,7 @@ namespace OmniV {
 
 		float near = 0.1f;
 		float far = 100.f;
-		bool isPerspective;
+		bool isPerspective = true;
 
 		float fovY = glm::radians(50.f);
 
@@ -49,8 +49,8 @@ namespace OmniV {
 
 		// Unfinished behavioiur
 		bool useTarget = false;
-		Vector3f target;
+		Vector3f target{ 0.f, 0.f, 0.f };
 
-		Vector3f up = Vector3f(0.f, -1.f, 0.f);
+		Vector3f up{ 0.f, -1.f, 0.f };
 	};
 }

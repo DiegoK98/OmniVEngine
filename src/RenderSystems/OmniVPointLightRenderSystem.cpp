@@ -14,126 +14,103 @@
 
 namespace OmniV {
 
-    struct PointLightPushConstants {
-        glm::vec4 position{};
-        glm::vec4 color{};
-        float radius;
-    };
+	struct PointLightPushConstants {
+		glm::vec4 position{};
+		glm::vec4 color{};
+		float radius;
+	};
 
-    OmniVPointLightRenderSystem::OmniVPointLightRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-        : omnivDevice{ device } {
-        createPipelineLayout(globalSetLayout);
-        createPipeline(renderPass);
-    }
+	OmniVPointLightRenderSystem::OmniVPointLightRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+		: OmniVRenderSystem(device) {
+		createPipelineLayout(globalSetLayout);
+		createPipeline(renderPass);
+	}
 
-    OmniVPointLightRenderSystem::~OmniVPointLightRenderSystem() {
-        vkDestroyPipelineLayout(omnivDevice.device(), pipelineLayout, nullptr);
-    }
+	OmniVPointLightRenderSystem::~OmniVPointLightRenderSystem() {}
 
-    void OmniVPointLightRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
-         VkPushConstantRange pushConstantRange{};
-         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-         pushConstantRange.offset = 0;
-         pushConstantRange.size = sizeof(PointLightPushConstants);
+	void OmniVPointLightRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(PointLightPushConstants);
 
-        std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
 
-        VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
-        pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-        pipelineLayoutInfo.pushConstantRangeCount = 1;
-        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-        if (vkCreatePipelineLayout(omnivDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
-            VK_SUCCESS) {
-            throw std::runtime_error("failed to create pipeline layout!");
-        }
-    }
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+		if (vkCreatePipelineLayout(omnivDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) !=
+			VK_SUCCESS) {
+			throw std::runtime_error("failed to create pipeline layout!");
+		}
+	}
 
-    void OmniVPointLightRenderSystem::createPipeline(VkRenderPass renderPass) {
-        assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+	void OmniVPointLightRenderSystem::createPipeline(VkRenderPass renderPass) {
+		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
-        PipelineConfigInfo pipelineConfig{};
-        OmniVPipeline::defaultPipelineConfigInfo(pipelineConfig);
-        OmniVPipeline::enableAlphaBlending(pipelineConfig);
-        pipelineConfig.attributeDescriptions.clear();
-        pipelineConfig.bindingDescriptions.clear();
-        pipelineConfig.renderPass = renderPass;
-        pipelineConfig.pipelineLayout = pipelineLayout;
-        omnivPipeline = std::make_unique<OmniVPipeline>(
-            omnivDevice,
-            "pointLightBillboard.vert.spv",
-            "pointLightBillboard.frag.spv",
-            pipelineConfig);
-    }
+		PipelineConfigInfo pipelineConfig{};
+		OmniVPipeline::defaultPipelineConfigInfo(pipelineConfig);
+		OmniVPipeline::enableAlphaBlending(pipelineConfig);
+		pipelineConfig.attributeDescriptions.clear();
+		pipelineConfig.bindingDescriptions.clear();
+		pipelineConfig.renderPass = renderPass;
+		pipelineConfig.pipelineLayout = pipelineLayout;
+		omnivPipeline = std::make_unique<OmniVPipeline>(
+			omnivDevice,
+			"pointLightBillboard.vert.spv",
+			"pointLightBillboard.frag.spv",
+			pipelineConfig);
+	}
 
-    void OmniVPointLightRenderSystem::update(FrameInfo& frameInfo, GlobalUbo& ubo) {
-        auto rotateLight = glm::rotate(glm::mat4(1.f), 0.5f * frameInfo.frameTime, { 0.f, -1.f, 0.f });
-        int lightIndex = 0;
-        for (auto& kv : frameInfo.gameObjects) {
-            auto& obj = kv.second;
-            if (obj.pointLight == nullptr) continue;
+	void OmniVPointLightRenderSystem::render(FrameInfo& frameInfo) {
+		// sort lights
+		std::map<float, OmniVGameObject::id_t> sorted;
 
-            assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
+		for (auto& kv : frameInfo.gameObjects) {
+			auto& obj = kv.second;
+			if (obj.pointLight == nullptr) continue;
 
-            // update light position
-            obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
+			// calculate distance
+			auto offset = frameInfo.camera.getPosition() - obj.transform.position;
+			float disSquared = glm::dot(offset, offset);
+			sorted[disSquared] = obj.getId();
+		}
 
-            // copy light to ubo
-            ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.position, 1.f);
-            ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+		omnivPipeline->bind(frameInfo.commandBuffer);
 
-            lightIndex += 1;
-        }
-        ubo.numLights = lightIndex;
-    }
+		vkCmdBindDescriptorSets(
+			frameInfo.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout,
+			0,
+			1,
+			&frameInfo.globalDescriptorSet,
+			0,
+			nullptr);
 
-    void OmniVPointLightRenderSystem::render(FrameInfo& frameInfo) {
-        // sort lights
-        std::map<float, OmniVGameObject::id_t> sorted;
+		// iterate through sorted lights in reverse order
+		for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
+			// use game obj id to find light object
+			auto& obj = frameInfo.gameObjects.at(it->second);
 
-        for (auto& kv : frameInfo.gameObjects) {
-            auto& obj = kv.second;
-            if (obj.pointLight == nullptr) continue;
+			PointLightPushConstants push{};
+			push.position = glm::vec4(obj.transform.position, 1.f);
+			push.color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+			push.radius = obj.transform.scale.x;
 
-            // calculate distance
-            auto offset = frameInfo.camera.getPosition() - obj.transform.position;
-            float disSquared = glm::dot(offset, offset);
-            sorted[disSquared] = obj.getId();
-        }
+			vkCmdPushConstants(
+				frameInfo.commandBuffer,
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(PointLightPushConstants),
+				&push);
 
-        omnivPipeline->bind(frameInfo.commandBuffer);
-
-        vkCmdBindDescriptorSets(
-            frameInfo.commandBuffer,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipelineLayout,
-            0,
-            1,
-            &frameInfo.globalDescriptorSet,
-            0,
-            nullptr);
-
-        // iterate through sorted lights in reverse order
-        for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
-            // use game obj id to find light object
-            auto& obj = frameInfo.gameObjects.at(it->second);
-
-            PointLightPushConstants push{};
-            push.position = glm::vec4(obj.transform.position, 1.f);
-            push.color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
-            push.radius = obj.transform.scale.x;
-
-            vkCmdPushConstants(
-                frameInfo.commandBuffer,
-                pipelineLayout,
-                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                0,
-                sizeof(PointLightPushConstants),
-                &push);
-
-            vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
-        }
-    }
+			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
+		}
+	}
 
 }

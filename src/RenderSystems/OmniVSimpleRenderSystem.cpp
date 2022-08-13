@@ -19,14 +19,12 @@ namespace OmniV {
 	};
 
 	OmniVSimpleRenderSystem::OmniVSimpleRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-		: omnivDevice{ device } {
+		: OmniVRenderSystem(device) {
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
-	OmniVSimpleRenderSystem::~OmniVSimpleRenderSystem() {
-		vkDestroyPipelineLayout(omnivDevice.device(), pipelineLayout, nullptr);
-	}
+	OmniVSimpleRenderSystem::~OmniVSimpleRenderSystem() {}
 
 	void OmniVSimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
 		VkPushConstantRange pushConstantRange{};
@@ -62,9 +60,9 @@ namespace OmniV {
 			pipelineConfig);
 	}
 
-	void OmniVSimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
+	void OmniVSimpleRenderSystem::render(FrameInfo& frameInfo) {
 		omnivPipeline->bind(frameInfo.commandBuffer);
-		
+
 		vkCmdBindDescriptorSets(
 			frameInfo.commandBuffer,
 			VK_PIPELINE_BIND_POINT_GRAPHICS,

@@ -1,7 +1,6 @@
 #include "OmniVEngineApp.hpp"
 #include "OmniVBuffer.hpp"
 #include "OmniVKeyboardMovementController.hpp"
-#include "OmniVFrameInfo.hpp"
 #include "RenderSystems/OmniVSimpleRenderSystem.hpp"
 #include "RenderSystems/OmniVPointLightRenderSystem.hpp"
 
@@ -60,6 +59,8 @@ namespace OmniV {
 		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 
+		OmniVRenderSystem* renderSystems[2] = { &simpleRenderSystem, &pointLightSystem };
+
 		// Create player controller
 		OmniVKeyboardMovementController viewerController{};
 
@@ -89,7 +90,7 @@ namespace OmniV {
 				GlobalUbo ubo{};
 				ubo.viewMat = camera.getView();
 				ubo.inverseViewMat = camera.getInverseView();
-				pointLightSystem.update(frameInfo, ubo);
+				updatePointLights(frameInfo, ubo);
 				ubo.projMat = camera.getProjection();
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
@@ -97,8 +98,8 @@ namespace OmniV {
 				// RenderPass (Begin Pass -> Draw -> End Pass)
 				omnivRenderer.beginSwapChainRenderPass(commandBuffer);
 
-				simpleRenderSystem.renderGameObjects(frameInfo);
-				pointLightSystem.render(frameInfo);
+				for (auto& system : renderSystems)
+					system->render(frameInfo);
 
 				omnivRenderer.endSwapChainRenderPass(commandBuffer);
 				omnivRenderer.endFrame();
@@ -171,5 +172,28 @@ namespace OmniV {
 
 			// assert that gameObjects size is not more than MAX_NUMBER_OF_OBJECTS
 		}
+	}
+
+	void OmniVEngineApp::updatePointLights(FrameInfo& frameInfo, GlobalUbo& ubo) {
+		// Continious rotation for lights
+		auto rotateLight = glm::rotate(glm::mat4(1.f), 0.5f * frameInfo.frameTime, { 0.f, -1.f, 0.f });
+
+		int lightIndex = 0;
+		for (auto& kv : frameInfo.gameObjects) {
+			auto& obj = kv.second;
+			if (obj.pointLight == nullptr) continue;
+
+			assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
+
+			// update light position
+			obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
+
+			// copy light to ubo
+			ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.position, 1.f);
+			ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+
+			lightIndex += 1;
+		}
+		ubo.numLights = lightIndex;
 	}
 }

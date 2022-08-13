@@ -1,35 +1,20 @@
 ﻿#pragma once
 
-#include "OmniVCamera.hpp"
-#include "OmniVDevice.hpp"
-#include "OmniVFrameInfo.hpp"
-#include "OmniVGameObject.hpp"
-#include "OmniVPipeline.hpp"
-
-// std
-#include <memory>
-#include <vector>
+#include "OmniVRenderSystem.hpp"
 
 namespace OmniV {
-	class OmniVPointLightRenderSystem {
+	class OmniVPointLightRenderSystem final : public OmniVRenderSystem {
 	public:
-		OmniVPointLightRenderSystem(
-			OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		OmniVPointLightRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~OmniVPointLightRenderSystem();
 
 		OmniVPointLightRenderSystem(const OmniVPointLightRenderSystem&) = delete;
 		OmniVPointLightRenderSystem& operator=(const OmniVPointLightRenderSystem&) = delete;
 
-		void update(FrameInfo& frameInfo, GlobalUbo& ubo);
-		void render(FrameInfo& frameInfo);
+		void render(FrameInfo& frameInfo) override;
 
 	private:
-		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
-		void createPipeline(VkRenderPass renderPass);
-
-		OmniVDevice& omnivDevice;
-
-		std::unique_ptr<OmniVPipeline> omnivPipeline;
-		VkPipelineLayout pipelineLayout;
+		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout) override;
+		void createPipeline(VkRenderPass renderPass) override;
 	};
 }
