@@ -37,54 +37,54 @@
   <!--Lights-->
 
   <light type="point">
-    <radiance name="radiance" value="1.0 0.1 0.1"/>
-    <intensity name="intensity" value="0.2"/>
-    <billboard name="billboard" value="true"/>
+    <radiance value="1.0 0.1 0.1"/>
+    <intensity value="0.2"/>
+    <billboard enabled="true"/>
     <transform>
       <position value="-1.0 -1.0 -1.0"/>
     </transform>
   </light>
 
   <light type="point">
-    <radiance name="radiance" value="0.1 0.1 1.0"/>
-    <intensity name="intensity" value="0.2"/>
-    <billboard name="billboard" value="true"/>
+    <radiance value="0.1 0.1 1.0"/>
+    <intensity value="0.2"/>
+    <billboard enabled="true"/>
     <transform>
       <position value="0.366 -1.0 -1.366"/>
     </transform>
   </light>
 
   <light type="point">
-    <radiance name="radiance" value="0.1 1.0 0.1"/>
-    <intensity name="intensity" value="0.2"/>
-    <billboard name="billboard" value="true"/>
+    <radiance value="0.1 1.0 0.1"/>
+    <intensity value="0.2"/>
+    <billboard enabled="true"/>
     <transform>
       <position value="1.366 -1.0 -0.366"/>
     </transform>
   </light>
 
   <light type="point">
-    <radiance name="radiance" value="1.0 1.0 0.1"/>
-    <intensity name="intensity" value="0.2"/>
-    <billboard name="billboard" value="true"/>
+    <radiance value="1.0 1.0 0.1"/>
+    <intensity value="0.2"/>
+    <billboard enabled="true"/>
     <transform>
       <position value="1.0 -1.0 1.0"/>
     </transform>
   </light>
 
   <light type="point">
-    <radiance name="radiance" value="0.1 1.0 1.0"/>
-    <intensity name="intensity" value="0.2"/>
-    <billboard name="billboard" value="true"/>
+    <radiance value="0.1 1.0 1.0"/>
+    <intensity value="0.2"/>
+    <billboard enabled="true"/>
     <transform>
       <position value="-0.366 -1.0 1.366"/>
     </transform>
   </light>
 
   <light type="point">
-    <radiance name="radiance" value="1.0 1.0 1.0"/>
-    <intensity name="intensity" value="0.2"/>
-    <billboard name="billboard" value="true"/>
+    <radiance value="1.0 1.0 1.0"/>
+    <intensity value="0.2"/>
+    <billboard enabled="true"/>
     <transform>
       <position value="-1.366 -1.0 0.366"/>
     </transform>

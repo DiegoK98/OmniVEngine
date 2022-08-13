@@ -108,16 +108,16 @@ namespace OmniV {
 		// Check for directional & ambient here
 
 		// Radiance
-		if (!lightNode.find_child_by_attribute("name", "radiance"))
+		if (!lightNode.child("radiance"))
 			throw std::runtime_error("Radiance undefinned");
 
-		glm::vec3 m_radiance = toVector3f(lightNode.find_child_by_attribute("name", "radiance").attribute("value").value());
+		glm::vec3 m_radiance = toVector3f(lightNode.child("radiance").attribute("value").value());
 
 		// Intensity
-		if (!lightNode.find_child_by_attribute("name", "intensity"))
+		if (!lightNode.child("intensity"))
 			return makeSimplePointLight(drawBillboard, m_radiance);
 		
-		float m_intensity = toFloat(lightNode.find_child_by_attribute("name", "intensity").attribute("value").value());
+		float m_intensity = toFloat(lightNode.child("intensity").attribute("value").value());
 
 		return makeSimplePointLight(drawBillboard, m_radiance, m_intensity);
 	}

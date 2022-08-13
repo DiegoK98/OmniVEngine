@@ -8,8 +8,6 @@
 
 namespace OmniV {
 
-#define MAX_LIGHTS 10
-
 	struct PointLight {
 		glm::vec4 position{};  // ignore w
 		glm::vec4 color{};     // w is intensity

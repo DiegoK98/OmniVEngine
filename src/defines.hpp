@@ -12,6 +12,10 @@
 #include <stdexcept>
 #include <vector>
 
+#define MAX_LIGHTS 10
+#define MAX_GAME_OBJECTS  10000
+#define MAX_CONCURRENT_RENDER_SYSTEMS 10
+
 namespace OmniV
 {
     typedef int8_t int8;
@@ -29,8 +33,6 @@ namespace OmniV
 
     typedef glm::mat3 Matrix3f;
     typedef glm::mat4 Matrix4f;
-
-    constexpr uint32_t MAX_CONCURRENT_RENDER_SYSTEMS = 10;
 
     /*constexpr float kPI = 3.14159265358979323846f;
     constexpr float k2PI = 2.f *  3.14159265358979323846f;

@@ -167,13 +167,13 @@ namespace OmniV {
 				gameObjects.emplace(gameObject.getId(), std::move(gameObject));
 			}
 
-			// assert that gameObjects size is not more than MAX_NUMBER_OF_OBJECTS
+			assert(gameObjects.size() < MAX_GAME_OBJECTS && "Exceeded maximum number of objects in scene");
 		}
 
 		// Lights parsing
 		for (pugi::xml_node node = scene_node.child("light"); node; node = node.next_sibling("light"))
 		{
-			bool drawBillboard = node.child("billboard") ? toBool(node.find_child_by_attribute("name", "billboard").attribute("value").value()) : false;
+			bool drawBillboard = node.child("billboard") ? toBool(node.child("billboard").attribute("enabled").value()) : false;
 
 			auto lightGameObject = OmniVGameObject::makeLightFromNode(node, drawBillboard);
 			lightGameObject.transform.initializeFromNode(node.child("transform"));
@@ -182,7 +182,7 @@ namespace OmniV {
 
 			if (!enabledSystems.pointLightRenderSystemEnable) enabledSystems.pointLightRenderSystemEnable = drawBillboard;
 
-			// assert that gameObjects size is not more than MAX_NUMBER_OF_OBJECTS
+			assert(gameObjects.size() < MAX_GAME_OBJECTS && "Exceeded maximum number of objects in scene");
 		}
 	}
 
@@ -196,7 +196,7 @@ namespace OmniV {
 			if (obj.pointLight == nullptr) continue;
 
 			// Maybe it would be better to just upload up to MAX_LIGHTS lights, ordering them by priority before uploading
-			assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
+			assert(lightIndex < MAX_LIGHTS && "Exceeded maximum number of lights in scene");
 
 			// update light position
 			obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
