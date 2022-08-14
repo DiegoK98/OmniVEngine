@@ -5,6 +5,8 @@
   <camera type="perspective">
     <transform>
       <position value="0.0 0.0 -2.5"/>
+      <!--<lookat target="0.0 0.0 0.0"
+              origin="0.0 0.0 -2.5"/>-->
     </transform>
   </camera>
 

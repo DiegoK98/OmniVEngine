@@ -10,7 +10,9 @@
 namespace OmniV {
 
 	void OmniVCamera::updateMatricesValues(float aspectRatio) {
-		setViewYXZ();
+		if (useTarget) setViewTarget();
+		else setViewYXZ();
+
 		if (isPerspective) setPerspectiveProjection(aspectRatio);
 		else setOrthographicProjection();
 	}
@@ -161,46 +163,39 @@ namespace OmniV {
 		if (count > 1)
 			throw std::runtime_error("More than 1 lookAt defined for the camera");
 
-		if (node.child("lookat"))
+		if (auto lookatNode = node.child("lookat"))
 		{
-			throw std::runtime_error("Unfinished behavioiur");
-
 			uint32 value_counter = 0;
 
-			if (node.child("lookat").attribute("target"))
+			if (auto targetAttr = lookatNode.attribute("target"))
 			{
-				camera.target = toVector3f(node.child("lookat").attribute("target").value());
+				camera.target = toVector3f(targetAttr.value());
 				value_counter++;
 			}
 
-			if (node.child("lookat").attribute("origin"))
+			if (auto originAttr = lookatNode.attribute("origin"))
 			{
-				camera.viewerGameObject.transform.position = toVector3f(node.child("lookat").attribute("origin").value());
+				camera.viewerGameObject.transform.position = toVector3f(originAttr.value());
 				value_counter++;
 			}
 
-			if (node.child("lookat").attribute("up"))
+			if (auto upAttr = lookatNode.attribute("up"))
 			{
-				camera.up = toVector3f(node.child("lookat").attribute("up").value());
-				value_counter++;
+				camera.up = toVector3f(upAttr.value());
 			}
 
-			if (value_counter != 3)
+			if (value_counter != 2)
 				throw std::runtime_error("LookAt not fully defined or malformed");
 		}
 
 		//clipping planes
 		if (i_camera_node.child("clip"))
 		{
-			if (i_camera_node.find_child_by_attribute("name", "far"))
-			{
-				camera.far = toFloat(i_camera_node.find_child_by_attribute("name", "far").attribute("value").value());
-			}
+			if (auto farNode = i_camera_node.find_child_by_attribute("name", "far"))
+				camera.far = toFloat(farNode.attribute("value").value());
 
-			if (i_camera_node.find_child_by_attribute("name", "near"))
-			{
-				camera.far = toFloat(i_camera_node.find_child_by_attribute("name", "near").attribute("value").value());
-			}
+			if (auto nearNode = i_camera_node.find_child_by_attribute("name", "near"))
+				camera.far = toFloat(nearNode.attribute("value").value());
 		}
 
 		return camera;
