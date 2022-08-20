@@ -11,7 +11,8 @@ const vec2 OFFSETS[6] = vec2[](
 
 layout (location = 0) out vec2 fragOffset;
 
-struct PointLight {
+struct Light {
+	int type;
 	vec4 position; // ignore w
 	vec4 color; // w is intensity
 	float radius;
@@ -22,7 +23,7 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
 	mat4 invViewMat;
 	mat4 projMat;
 	vec4 ambientLightColor; // w is intensity
-	PointLight pointLights[10];
+	Light lights[10];
 	int numLights;
 } ubo;
 

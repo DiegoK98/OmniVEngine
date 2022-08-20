@@ -52,6 +52,6 @@ namespace OmniV {
 
 		EnabledRenderSystems enabledSystems;
 
-		void updatePointLights(FrameInfo& frameInfo, GlobalUbo& ubo);
+		void updateLights(FrameInfo& frameInfo, GlobalUbo& ubo);
 	};
 }

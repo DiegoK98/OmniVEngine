@@ -8,10 +8,16 @@
 
 namespace OmniV {
 
-	struct PointLight {
-		glm::vec4 position{}; // ignore w
-		glm::vec4 color{}; // w is intensity
-		alignas(16) float radius;
+	enum LightType {
+		Directional = 0,
+		Point = 1,
+	};
+
+	struct Light {
+		alignas(16) LightType type = Directional;
+		alignas(16) glm::vec4 position{}; // ignore w. For directional lights, the position vector is treated as its direction
+		alignas(16) glm::vec4 color{}; // w is intensity
+		alignas(16) float radius = 0.1f;
 	};
 
 	struct GlobalUbo {
@@ -19,7 +25,7 @@ namespace OmniV {
 		glm::mat4 inverseViewMat{ 1.f };
 		glm::mat4 projMat{ 1.f };
 		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f };  // w is intensity
-		PointLight pointLights[MAX_LIGHTS];
+		Light lights[MAX_LIGHTS];
 		int numLights;
 	};
 

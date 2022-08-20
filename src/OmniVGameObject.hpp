@@ -28,6 +28,11 @@ namespace OmniV {
         void initializeFromNode(pugi::xml_node transformNode);
     };
 
+    struct DirectionalLightComponent {
+        float lightIntensity = 1.0f;
+        glm::vec3 direction{};
+    };
+
     struct PointLightComponent {
         float lightIntensity = 1.0f;
         bool drawBillboard = false;
@@ -43,6 +48,7 @@ namespace OmniV {
             return OmniVGameObject{ currentId++ };
         }
 
+        static OmniVGameObject makeSimpleDirectionalLight(glm::vec3 direction, glm::vec3 color = glm::vec3(1.f), float intensity = 5.f);
         static OmniVGameObject makeSimplePointLight(bool drawBillboard = false, glm::vec3 color = glm::vec3(1.f), float intensity = 5.f, float radius = 0.1f);
         static OmniVGameObject makeLightFromNode(pugi::xml_node lightNode, bool drawBillboard);
 
@@ -58,6 +64,7 @@ namespace OmniV {
 
         // Optional pointer components
         std::shared_ptr<OmniVModel> model{};
+        std::unique_ptr<DirectionalLightComponent> directionalLight = nullptr;
         std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
     private:

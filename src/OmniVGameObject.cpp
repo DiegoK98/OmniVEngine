@@ -92,8 +92,19 @@ namespace OmniV {
 		}
 	}
 
+	OmniVGameObject OmniVGameObject::makeSimpleDirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity) {
+		OmniVGameObject gameObj = OmniVGameObject::createGameObject();
+
+		gameObj.color = color;
+		gameObj.directionalLight = std::make_unique<DirectionalLightComponent>();
+		gameObj.directionalLight->lightIntensity = intensity;
+		gameObj.directionalLight->direction = direction;
+
+		return gameObj;
+	}
+
 	OmniVGameObject OmniVGameObject::makeSimplePointLight(bool drawBillboard, glm::vec3 color, float intensity, float radius) {
-		OmniVGameObject  gameObj = OmniVGameObject::createGameObject();
+		OmniVGameObject gameObj = OmniVGameObject::createGameObject();
 
 		gameObj.color = color;
 		gameObj.pointLight = std::make_unique<PointLightComponent>();
@@ -105,19 +116,43 @@ namespace OmniV {
 	}
 
 	OmniVGameObject OmniVGameObject::makeLightFromNode(pugi::xml_node lightNode, bool drawBillboard) {
-		// Check for directional & ambient here
+		// Directional light
+		if (strcmp(lightNode.attribute("type").value(), "directional") == 0)
+		{
+			// Radiance
+			if (!lightNode.child("radiance"))
+				throw std::runtime_error("Radiance undefinned");
 
-		// Radiance
-		if (!lightNode.child("radiance"))
-			throw std::runtime_error("Radiance undefinned");
+			glm::vec3 m_radiance = toVector3f(lightNode.child("radiance").attribute("value").value());
 
-		glm::vec3 m_radiance = toVector3f(lightNode.child("radiance").attribute("value").value());
+			// Intensity
+			float light_intensity = lightNode.child("intensity") ? toFloat(lightNode.child("intensity").attribute("value").value()) : 5.0f;
 
-		// Intensity
-		float light_intensity = lightNode.child("intensity") ? toFloat(lightNode.child("intensity").attribute("value").value()) : 5.0f;
+			float light_radius = lightNode.child("radius") ? toFloat(lightNode.child("radius").attribute("value").value()) : 0.1f;
 
-		float light_radius = lightNode.child("radius") ? toFloat(lightNode.child("radius").attribute("value").value()) : 0.1f;
+			return makeSimpleDirectionalLight(toVector3f(lightNode.child("direction").attribute("value").value()), m_radiance, light_intensity);
+		}
 
-		return makeSimplePointLight(drawBillboard, m_radiance, light_intensity, light_radius);
+		// Point light
+		if (strcmp(lightNode.attribute("type").value(), "point") == 0)
+		{
+			// Radiance
+			if (!lightNode.child("radiance"))
+				throw std::runtime_error("Radiance undefinned");
+
+			glm::vec3 m_radiance = toVector3f(lightNode.child("radiance").attribute("value").value());
+
+			// Intensity
+			float light_intensity = lightNode.child("intensity") ? toFloat(lightNode.child("intensity").attribute("value").value()) : 5.0f;
+
+			float light_radius = lightNode.child("radius") ? toFloat(lightNode.child("radius").attribute("value").value()) : 0.1f;
+
+			OmniVGameObject gameObj = makeSimplePointLight(drawBillboard, m_radiance, light_intensity, light_radius);
+			gameObj.transform.initializeFromNode(lightNode.child("transform"));
+
+			return gameObj;
+		}
+
+		throw std::runtime_error("Light type not defined");
 	}
 }

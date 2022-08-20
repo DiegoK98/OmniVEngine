@@ -61,7 +61,7 @@ namespace OmniV {
 
 		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 		if (enabledSystems.simpleRenderSystemEnable) renderSystems[0] = &simpleRenderSystem;
-		
+
 		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 		if (enabledSystems.pointLightRenderSystemEnable) renderSystems[1] = &pointLightSystem;
 
@@ -97,7 +97,7 @@ namespace OmniV {
 				ubo.projMat = camera.getProjection();
 
 				// Update point lights
-				updatePointLights(frameInfo, ubo);
+				updateLights(frameInfo, ubo);
 
 				// Upload UBO
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
@@ -176,7 +176,6 @@ namespace OmniV {
 			bool drawBillboard = node.child("billboard") ? toBool(node.child("billboard").attribute("enabled").value()) : false;
 
 			auto lightGameObject = OmniVGameObject::makeLightFromNode(node, drawBillboard);
-			lightGameObject.transform.initializeFromNode(node.child("transform"));
 
 			gameObjects.emplace(lightGameObject.getId(), std::move(lightGameObject));
 
@@ -186,27 +185,41 @@ namespace OmniV {
 		}
 	}
 
-	void OmniVEngineApp::updatePointLights(FrameInfo& frameInfo, GlobalUbo& ubo) {
+	// User-defined function
+	void OmniVEngineApp::updateLights(FrameInfo& frameInfo, GlobalUbo& ubo) {
 		// Continious rotation for lights
 		auto rotateLight = glm::rotate(glm::mat4(1.f), 0.5f * frameInfo.frameTime, { 0.f, -1.f, 0.f });
 
 		int lightIndex = 0;
 		for (auto& kv : frameInfo.gameObjects) {
 			auto& obj = kv.second;
-			if (obj.pointLight == nullptr) continue;
 
 			// Maybe it would be better to just upload up to MAX_LIGHTS lights, ordering them by priority before uploading
 			assert(lightIndex < MAX_LIGHTS && "Exceeded maximum number of lights in scene");
 
-			// update light position
-			obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
+			if (obj.directionalLight != nullptr)
+			{
+				// copy light to ubo
+				ubo.lights[lightIndex].type = Directional;
+				ubo.lights[lightIndex].position = glm::vec4(obj.directionalLight->direction, 0.f);
+				ubo.lights[lightIndex].color = glm::vec4(obj.color, obj.directionalLight->lightIntensity);
 
-			// copy light to ubo
-			ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.position, 1.f);
-			ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
-			ubo.pointLights[lightIndex].radius = obj.transform.scale.x;
+				lightIndex += 1;
+			}
 
-			lightIndex += 1;
+			if (obj.pointLight != nullptr)
+			{
+				// update light position
+				obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
+
+				// copy light to ubo
+				ubo.lights[lightIndex].type = Point;
+				ubo.lights[lightIndex].position = glm::vec4(obj.transform.position, 1.f);
+				ubo.lights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+				ubo.lights[lightIndex].radius = obj.transform.scale.x;
+
+				lightIndex += 1;
+			}
 		}
 		ubo.numLights = lightIndex;
 	}
