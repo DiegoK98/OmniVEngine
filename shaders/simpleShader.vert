@@ -12,6 +12,7 @@ layout(location = 2) out vec3 fragNormalWorld;
 struct PointLight {
 	vec4 position; // ignore w
 	vec4 color; // w is intensity
+	float radius;
 };
 
 layout(set = 0, binding = 0) uniform GlobalUbo {

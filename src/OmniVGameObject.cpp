@@ -114,11 +114,10 @@ namespace OmniV {
 		glm::vec3 m_radiance = toVector3f(lightNode.child("radiance").attribute("value").value());
 
 		// Intensity
-		if (!lightNode.child("intensity"))
-			return makeSimplePointLight(drawBillboard, m_radiance);
-		
-		float m_intensity = toFloat(lightNode.child("intensity").attribute("value").value());
+		float light_intensity = lightNode.child("intensity") ? toFloat(lightNode.child("intensity").attribute("value").value()) : 5.0f;
 
-		return makeSimplePointLight(drawBillboard, m_radiance, m_intensity);
+		float light_radius = lightNode.child("radius") ? toFloat(lightNode.child("radius").attribute("value").value()) : 0.1f;
+
+		return makeSimplePointLight(drawBillboard, m_radiance, light_intensity, light_radius);
 	}
 }

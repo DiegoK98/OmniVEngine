@@ -43,7 +43,7 @@ namespace OmniV {
             return OmniVGameObject{ currentId++ };
         }
 
-        static OmniVGameObject makeSimplePointLight(bool drawBillboard = false, glm::vec3 color = glm::vec3(1.f), float intensity = 10.f, float radius = 0.1f);
+        static OmniVGameObject makeSimplePointLight(bool drawBillboard = false, glm::vec3 color = glm::vec3(1.f), float intensity = 5.f, float radius = 0.1f);
         static OmniVGameObject makeLightFromNode(pugi::xml_node lightNode, bool drawBillboard);
 
         OmniVGameObject(const OmniVGameObject&) = delete;

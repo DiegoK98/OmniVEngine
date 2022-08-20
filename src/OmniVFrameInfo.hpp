@@ -9,8 +9,9 @@
 namespace OmniV {
 
 	struct PointLight {
-		glm::vec4 position{};  // ignore w
-		glm::vec4 color{};     // w is intensity
+		glm::vec4 position{}; // ignore w
+		glm::vec4 color{}; // w is intensity
+		alignas(16) float radius;
 	};
 
 	struct GlobalUbo {

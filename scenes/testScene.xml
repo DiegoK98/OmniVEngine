@@ -43,7 +43,7 @@
     <intensity value="0.2"/>
     <billboard enabled="true"/>
     <transform>
-      <position value="-1.0 -1.0 -1.0"/>
+      <position value="-1.0 -0.3 -1.0"/>
     </transform>
   </light>
 
@@ -52,7 +52,7 @@
     <intensity value="0.2"/>
     <billboard enabled="true"/>
     <transform>
-      <position value="0.366 -1.0 -1.366"/>
+      <position value="0.366 -0.3 -1.366"/>
     </transform>
   </light>
 
@@ -61,7 +61,7 @@
     <intensity value="0.2"/>
     <billboard enabled="true"/>
     <transform>
-      <position value="1.366 -1.0 -0.366"/>
+      <position value="1.366 -0.3 -0.366"/>
     </transform>
   </light>
 
@@ -70,7 +70,7 @@
     <intensity value="0.2"/>
     <billboard enabled="true"/>
     <transform>
-      <position value="1.0 -1.0 1.0"/>
+      <position value="1.0 -0.3 1.0"/>
     </transform>
   </light>
 
@@ -79,7 +79,7 @@
     <intensity value="0.2"/>
     <billboard enabled="true"/>
     <transform>
-      <position value="-0.366 -1.0 1.366"/>
+      <position value="-0.366 -0.3 1.366"/>
     </transform>
   </light>
 
@@ -88,7 +88,7 @@
     <intensity value="0.2"/>
     <billboard enabled="true"/>
     <transform>
-      <position value="-1.366 -1.0 0.366"/>
+      <position value="-1.366 -0.3 0.366"/>
     </transform>
   </light>
 

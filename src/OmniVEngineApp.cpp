@@ -204,6 +204,7 @@ namespace OmniV {
 			// copy light to ubo
 			ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.position, 1.f);
 			ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+			ubo.pointLights[lightIndex].radius = obj.transform.scale.x;
 
 			lightIndex += 1;
 		}
