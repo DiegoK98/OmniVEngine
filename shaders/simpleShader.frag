@@ -30,12 +30,25 @@ layout(push_constant) uniform Push {
 vec3 surfaceNormal;
 vec3 viewDirection;
 
-float glossiness = 60.0; // 512.0 was the value from the LveEngine tutorial
+float glossiness = 60.0; // higher values -> sharper highlight
 float d0 = 1.0; // Distance at which the light intensity is defined (reference point for attenuation)
+
+// Window function, to avoid a sharp cutoff at the boundary of the light's influence area
+float winFunc(float fallOffDist, float maxFallOffDist)
+{
+	return pow(max(0, 1.0 - pow(fallOffDist/maxFallOffDist, 4)), 2);
+}
+
+float fallofFunction(float squaredDistance, float lightRadius)
+{
+	return (d0 + lightRadius) / max(squaredDistance, lightRadius); // Inverse-square light attenuation. Added my own modification
+}
 
 float attenuation(float squaredDistance, float lightRadius)
 {
-	return (d0 + lightRadius) / max(squaredDistance, lightRadius); // Inverse-square light attenuation. Added my own modification
+	float lightInfluenceRadius = lightRadius * 100.0f; // lightInfluenceRadius should be an exposed value for the user to tweak per light
+	float fallOff = fallofFunction(squaredDistance, lightRadius);
+	return winFunc(squaredDistance, lightInfluenceRadius) * fallOff;
 }
 
 vec3 pointLightShade(PointLight light)
@@ -58,7 +71,7 @@ vec3 pointLightShade(PointLight light)
 	vec3 halfAngle = normalize(viewDirection - lightDir);
 	float blinnTerm = dot(surfaceNormal, halfAngle);
 	blinnTerm = clamp(blinnTerm, 0, 1);
-	blinnTerm = pow(blinnTerm, glossiness); // higher values -> sharper highlight
+	blinnTerm = pow(blinnTerm, glossiness);
 
 	shadeColor += intensity * blinnTerm;
 
