@@ -1,7 +1,7 @@
 # OmniVEngine
 Vulkan Render Engine. The goal of this project is to provide an engine where you can develop and showcase many different shading techniques, for research purposes.
 This is not a game engine, but I plan on including a GUI layer on top of the current engine, making it easier to create basic games.
-The Engine was initially built based on the tutorial videos by blurrypiano: [blurrypiano engine](https://github.com/blurrypiano/littleVulkanEngine))**
+The Engine was initially based on the video tutorial series by [blurrypiano](https://github.com/blurrypiano/littleVulkanEngine)
 
 ## Setup guide
 ### Pre-requisites
