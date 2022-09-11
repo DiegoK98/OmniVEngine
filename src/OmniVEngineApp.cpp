@@ -166,22 +166,22 @@ namespace OmniV {
 
 		// Meshes parsing
 		std::shared_ptr<OmniVModel> omnivModel;
-		for (pugi::xml_node node = sceneNode.child("mesh"); node; node = node.next_sibling("mesh"))
+		for (pugi::xml_node meshNode = sceneNode.child("mesh"); meshNode; meshNode = meshNode.next_sibling("mesh"))
 		{
-			if (!node.attribute("type"))
-				throw std::runtime_error("Node without type attribute");
+			if (!meshNode.attribute("type"))
+				throw std::runtime_error("Mesh without type defined");
 
-			if (strcmp(node.attribute("type").value(), "obj") == 0)
+			if (strcmp(meshNode.attribute("type").value(), "obj") == 0)
 			{
-				if (!node.find_child_by_attribute("name", "filename"))
+				if (!meshNode.find_child_by_attribute("name", "filename"))
 					throw std::runtime_error("Obj no defined");
 
 				auto gameObject = OmniVGameObject::createGameObject();
 
-				std::string objPath = node.find_child_by_attribute("name", "filename").attribute("value").value();
+				std::string objPath = meshNode.find_child_by_attribute("name", "filename").attribute("value").value();
 				omnivModel = OmniVModel::createModelFromFile(omnivDevice, objPath);
 				gameObject.model = omnivModel;
-				gameObject.transform.initializeFromNode(node.child("transform"));
+				gameObject.transform.initializeFromNode(meshNode.child("transform"));
 
 				gameObjects.emplace(gameObject.getId(), std::move(gameObject));
 			}
@@ -190,11 +190,11 @@ namespace OmniV {
 		}
 
 		// Lights parsing
-		for (pugi::xml_node node = sceneNode.child("light"); node; node = node.next_sibling("light"))
+		for (pugi::xml_node lightNode = sceneNode.child("light"); lightNode; lightNode = lightNode.next_sibling("light"))
 		{
-			bool drawBillboard = node.child("billboard") ? toBool(node.child("billboard").attribute("enabled").value()) : false;
+			bool drawBillboard = lightNode.child("billboard") ? toBool(lightNode.child("billboard").attribute("enabled").value()) : false;
 
-			auto lightGameObject = OmniVGameObject::loadLightFromNode(node, drawBillboard);
+			auto lightGameObject = OmniVGameObject::loadLightFromNode(lightNode, drawBillboard);
 
 			gameObjects.emplace(lightGameObject.getId(), std::move(lightGameObject));
 
