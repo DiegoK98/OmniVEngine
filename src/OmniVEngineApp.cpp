@@ -95,6 +95,7 @@ namespace OmniV {
 				ubo.viewMat = camera.getView();
 				ubo.inverseViewMat = camera.getInverseView();
 				ubo.projMat = camera.getProjection();
+				ubo.ambientLight = renderSettings.ambientLight;
 
 				// Update point lights
 				updateLights(frameInfo, ubo);
@@ -122,32 +123,50 @@ namespace OmniV {
 		std::string scenePath = "../scenes/" + sceneFile;
 
 		pugi::xml_document doc;
-		pugi::xml_parse_result result = doc.load_file(scenePath.c_str());
 
-		if (!result)
+		// Load file to doc
+		if (!doc.load_file(scenePath.c_str()))
 			throw std::runtime_error("Error while parsing " + sceneFile);
 
+		// Scene node
+		auto sceneNode = doc.child("scene");
+
+		///// Checks before parsing /////
+		// Scene
 		size_t count = std::distance(doc.children("scene").begin(), doc.children("scene").end());
 
 		if (count == 0)
-			throw std::runtime_error("No scene node");
+			throw std::runtime_error("No scene defined");
+		else if (count > 1)
+			throw std::runtime_error("Multiple scenes are not allowed");
 
-		auto scene_node = doc.child("scene");
-		/* Create scene object */
-
-		// Camera parsing
-		count = std::distance(scene_node.children("camera").begin(), scene_node.children("camera").end());
+		// Render Settings
+		count = std::distance(sceneNode.children("rendersettings").begin(), sceneNode.children("rendersettings").end());
 
 		if (count == 0)
-			throw std::runtime_error("No camera node");
+			throw std::runtime_error("No render settings defined");
+		else if (count > 1)
+			throw std::runtime_error("Multiple rendersettings not allowed");
 
-		camera = OmniVCamera::makeCameraFromNode(scene_node.child("camera"));
+		// Camera
+		count = std::distance(sceneNode.children("camera").begin(), sceneNode.children("camera").end());
 
-		uint32_t entity_id = 0;
+		if (count == 0)
+			throw std::runtime_error("No camera defined");
+		else if (count > 1)
+			throw std::runtime_error("Multiple cameras are not allowed (bound to change)");
+
+		/* Create scene object */
+
+		// Render Settings parsing
+		renderSettings = RenderSettings::loadRenderSettings(sceneNode.child("rendersettings"));
+
+		// Camera parsing
+		camera = OmniVCamera::loadCameraFromNode(sceneNode.child("camera"));
+
+		// Meshes parsing
 		std::shared_ptr<OmniVModel> omnivModel;
-
-		// GameObjects parsing
-		for (pugi::xml_node node = scene_node.child("mesh"); node; node = node.next_sibling("mesh"))
+		for (pugi::xml_node node = sceneNode.child("mesh"); node; node = node.next_sibling("mesh"))
 		{
 			if (!node.attribute("type"))
 				throw std::runtime_error("Node without type attribute");
@@ -171,11 +190,11 @@ namespace OmniV {
 		}
 
 		// Lights parsing
-		for (pugi::xml_node node = scene_node.child("light"); node; node = node.next_sibling("light"))
+		for (pugi::xml_node node = sceneNode.child("light"); node; node = node.next_sibling("light"))
 		{
 			bool drawBillboard = node.child("billboard") ? toBool(node.child("billboard").attribute("enabled").value()) : false;
 
-			auto lightGameObject = OmniVGameObject::makeLightFromNode(node, drawBillboard);
+			auto lightGameObject = OmniVGameObject::loadLightFromNode(node, drawBillboard);
 
 			gameObjects.emplace(lightGameObject.getId(), std::move(lightGameObject));
 

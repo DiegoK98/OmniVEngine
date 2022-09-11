@@ -49,6 +49,7 @@ namespace OmniV {
 		OmniVGameObject::Map gameObjects; // Should be part of a scene object
 
 		OmniVCamera camera{};
+		RenderSettings renderSettings;
 
 		EnabledRenderSystems enabledSystems;
 

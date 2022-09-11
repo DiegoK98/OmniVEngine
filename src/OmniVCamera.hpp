@@ -17,7 +17,7 @@ namespace OmniV {
 
 		void updateMatricesValues(float aspectRatio);
 
-		static OmniVCamera makeCameraFromNode(pugi::xml_node i_camera_node);
+		static OmniVCamera loadCameraFromNode(pugi::xml_node i_camera_node);
 
 		const glm::mat4& getView() const { return viewMatrix; }
 		const glm::mat4& getInverseView() const { return inverseViewMatrix; }

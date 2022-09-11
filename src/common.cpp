@@ -91,9 +91,9 @@ namespace OmniV
 
 	Vector2f toVector2f(const std::string& str) {
 		std::vector<std::string> tokens = tokenize(str);
-		if (tokens.size() != 3)
+		if (tokens.size() != 2)
 		{
-			throw std::runtime_error("Expected 3 values");
+			throw std::runtime_error("Expected 2 values");
 		}
 
 		return Vector2f(toFloat(tokens[0]), toFloat(tokens[1]));
@@ -107,5 +107,15 @@ namespace OmniV
 		}
 
 		return Vector3f(toFloat(tokens[0]), toFloat(tokens[1]), toFloat(tokens[2]));
+	}
+
+	Vector4f toVector4f(const std::string& str) {
+		std::vector<std::string> tokens = tokenize(str);
+		if (tokens.size() != 4)
+		{
+			throw std::runtime_error("Expected 4 values");
+		}
+
+		return Vector4f(toFloat(tokens[0]), toFloat(tokens[1]), toFloat(tokens[2]), toFloat(tokens[3]));
 	}
 };

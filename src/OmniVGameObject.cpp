@@ -115,7 +115,7 @@ namespace OmniV {
 		return gameObj;
 	}
 
-	OmniVGameObject OmniVGameObject::makeLightFromNode(pugi::xml_node lightNode, bool drawBillboard) {
+	OmniVGameObject OmniVGameObject::loadLightFromNode(pugi::xml_node lightNode, bool drawBillboard) {
 		// Directional light
 		if (strcmp(lightNode.attribute("type").value(), "directional") == 0)
 		{

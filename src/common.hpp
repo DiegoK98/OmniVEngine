@@ -19,4 +19,6 @@ namespace OmniV
     Vector2f toVector2f(const std::string& str);
 
     Vector3f toVector3f(const std::string& str);
+
+    Vector4f toVector4f(const std::string& str);
 }

@@ -24,7 +24,7 @@ namespace OmniV {
 		glm::mat4 viewMat{ 1.f };
 		glm::mat4 inverseViewMat{ 1.f };
 		glm::mat4 projMat{ 1.f };
-		glm::vec4 ambientLightColor{ 1.f, 1.f, 1.f, .02f };  // w is intensity
+		glm::vec4 ambientLight{ 1.f, 1.f, 1.f, .02f };  // w is intensity
 		Light lights[MAX_LIGHTS];
 		int numLights;
 	};
@@ -36,5 +36,18 @@ namespace OmniV {
 		OmniVCamera& camera;
 		VkDescriptorSet globalDescriptorSet;
 		OmniVGameObject::Map& gameObjects;
+	};
+
+	struct RenderSettings {
+		glm::vec4 ambientLight;
+
+		static RenderSettings loadRenderSettings(pugi::xml_node i_settings_node) {
+			auto renderSettings = RenderSettings{};
+
+			pugi::xml_node ambientLightNode = i_settings_node.child("ambientlight");
+			renderSettings.ambientLight = toVector4f(ambientLightNode.attribute("value").value());
+
+			return renderSettings;
+		}
 	};
 }

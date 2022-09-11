@@ -130,7 +130,7 @@ namespace OmniV {
 		inverseViewMatrix[3][2] = position.z;
 	}
 
-	OmniVCamera OmniVCamera::makeCameraFromNode(pugi::xml_node i_camera_node) {
+	OmniVCamera OmniVCamera::loadCameraFromNode(pugi::xml_node i_camera_node) {
 		auto camera = OmniVCamera{};
 
 		if (strcmp(i_camera_node.attribute("type").value(), "perspective") == 0)
