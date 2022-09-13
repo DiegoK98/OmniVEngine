@@ -120,7 +120,7 @@ namespace OmniV {
 	}
 
 	void OmniVEngineApp::loadScene(const std::string& sceneFile) {
-		std::string scenePath = "../scenes/" + sceneFile;
+		std::string scenePath = WORKING_DIR "scenes/" + sceneFile;
 
 		pugi::xml_document doc;
 

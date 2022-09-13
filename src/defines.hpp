@@ -1,5 +1,8 @@
 #pragma once
 
+// I am sure this could be more generic with environment variables or something
+#define WORKING_DIR "D:/Documents/OmniVEngine/"
+
 // libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

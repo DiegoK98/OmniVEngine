@@ -1,3 +1,4 @@
+#include "common.hpp"
 #include "OmniVPipeline.hpp"
 #include "OmniVModel.hpp"
 
@@ -46,8 +47,8 @@ namespace OmniV {
 		assert(
 			configInfo.renderPass != VK_NULL_HANDLE &&
 			"Cannot create graphics pipeline: no renderPass provided in configInfo");
-		auto vertCode = readFile("../shaders/" + vertFilepath);
-		auto fragCode = readFile("../shaders/" + fragFilepath);
+		auto vertCode = readFile(WORKING_DIR "shaders/" + vertFilepath);
+		auto fragCode = readFile(WORKING_DIR "shaders/" + fragFilepath);
 
 		createShaderModule(vertCode, &vertShaderModule);
 		createShaderModule(fragCode, &fragShaderModule);

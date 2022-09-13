@@ -1,5 +1,5 @@
+#include "common.hpp"
 #include "OmniVModel.hpp"
-
 #include "OmniVUtils.hpp"
 
 // libs
@@ -35,7 +35,7 @@ namespace OmniV {
 
 	std::unique_ptr<OmniVModel> OmniVModel::createModelFromFile(OmniVDevice& device, const std::string& filepath) {
 		Builder builder{};
-		builder.loadModel("../models/" + filepath);
+		builder.loadModel(WORKING_DIR "models/" + filepath);
 		return std::make_unique<OmniVModel>(device, builder);
 	}
 
