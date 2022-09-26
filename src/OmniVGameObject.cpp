@@ -77,7 +77,7 @@ namespace OmniV {
 			{
 				// Check for quaternions
 				if (it->attribute("value"))
-					rotation = toVector3f(it->attribute("eulerAngles").value());
+					rotation = toVector3f(it->attribute("value").value());
 				else
 					throw std::runtime_error("Transform rotation malformed");
 			}

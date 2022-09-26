@@ -19,6 +19,11 @@
 #define MAX_GAME_OBJECTS  10000
 #define MAX_CONCURRENT_RENDER_SYSTEMS 10
 
+// Should be an input from the scene or something
+// The actual way to do it would be to add behaviours/scripts that the user will create
+// and attach to objects in a component system like Unity
+#define ROTATE_LIGHTS 0
+
 namespace OmniV
 {
     typedef int8_t int8;

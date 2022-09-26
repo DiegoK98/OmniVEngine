@@ -1,19 +1,83 @@
 <scene>
+
+	<!--RenderSettings-->
+
+  	<rendersettings>
+    	<ambientlight value="1 1 1 0.02"/>
+  	</rendersettings>
+
+  	<!--Camera-->
+
+  	<camera type="perspective">
+    	<transform>
+      		<position value="0.0 0.0 -2.5"/>
+      		<!--<lookat target="0.0 0.0 0.0" origin="0.0 0.0 -2.5"/>-->
+    		</transform>
+  	</camera>
+
 	<mesh type="obj">
 		<string name="filename" value="bunny.obj"/>
+		<transform>
+			<scale value="5.0 5.0 5.0"/>
+			<rotation value="3.2 0 0"/>
+			<position value="0.0 0.5 0.0"/>
+		</transform>
 	</mesh>
 
-	<!--<light type="ambient">
-		<radiance value="1 1 1"/>
-		<intensity value="0.02"/>
-	</light>-->
+  	<!--Lights-->
 
+	<light type="point">
+		<radiance value="1.0 0.1 0.1"/> <!--Red-->
+		<intensity value="0.2"/>
+		<billboard enabled="true"/>
+		<transform>
+		<position value="-1 0.0 -1"/>
+		</transform>
+	</light>
 
-  <light type="point">
-    <transform>
-			<position value="0.0 3.0 3.0"/>
-    </transform>
-		<radiance name="radiance" value="0.8 0.2 0.2"/>
+	<light type="point">
+		<radiance value="0.1 0.1 1.0"/> <!--Blue-->
+		<intensity value="0.2"/>
+		<billboard enabled="true"/>
+		<transform>
+		<position value="0.4 -0.2 -1.366"/>
+		</transform>
+	</light>
+
+	<light type="point">
+		<radiance value="0.1 1.0 0.1"/> <!--Green-->
+		<intensity value="0.2"/>
+		<billboard enabled="true"/>
+		<transform>
+		<position value="1.366 -0.3 -0.366"/>
+		</transform>
+	</light>
+
+	<light type="point">
+		<radiance value="1.0 1.0 0.1"/> <!--Yellow-->
+		<intensity value="0.2"/>
+		<billboard enabled="true"/>
+		<transform>
+		<position value="1 0.5 1"/>
+		</transform>
+	</light>
+
+	<light type="point">
+		<radiance value="0.1 1.0 1.0"/> <!--Cyan-->
+		<intensity value="0.2"/>
+		<billboard enabled="true"/>
+		<transform>
+		<position value="-0.9 -0.5 1.366"/>
+		</transform>
+	</light>
+
+	<light type="point">
+		<radiance value="1.0 1.0 1.0"/> <!--White-->
+		<intensity value="0.2"/>
+		<billboard enabled="true"/>
+		<transform>
+		<position value="-1.366 0.5 0.366"/>
+		</transform>
 	</light>
   
 </scene>

@@ -97,7 +97,7 @@ namespace OmniV {
 				ubo.projMat = camera.getProjection();
 				ubo.ambientLight = renderSettings.ambientLight;
 
-				// Update point lights
+				// Update lights
 				updateLights(frameInfo, ubo);
 
 				// Upload UBO
@@ -229,7 +229,8 @@ namespace OmniV {
 			if (obj.pointLight != nullptr)
 			{
 				// update light position
-				obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
+				if (ROTATE_LIGHTS)
+					obj.transform.position = glm::vec3(rotateLight * glm::vec4(obj.transform.position, 1.f));
 
 				// copy light to ubo
 				ubo.lights[lightIndex].type = Point;
