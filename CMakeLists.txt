@@ -1,82 +1,111 @@
-﻿include(./.env.cmake OPTIONAL RESULT_VARIABLE LOCAL_ENV)
-message(STATUS "Local .env.cmake: ${LOCAL_ENV}")
-
+﻿include(./libpaths.cmake OPTIONAL RESULT_VARIABLE LOCAL_ENV)
 cmake_minimum_required(VERSION 3.11.0)
 
 set(NAME OmniV)
-
-set(GLFW_PATH libs/glfw)
-set(GLM_PATH libs/glm)
-set(PUGIXML_PATH libs/pugixml)
-
-message(STATUS "using ${CMAKE_GENERATOR}")
-if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
-    if (NOT MINGW_PATH) 
-      message(FATAL_ERROR "MINGW_PATH not set in .env.cmake")
-    endif()
-    set(USE_MINGW "True")
-    set(CMAKE_C_COMPILER ${MINGW_PATH}/bin/gcc.exe)
-    set(CMAKE_CXX_COMPILER  ${MINGW_PATH}/bin/g++.exe)
-endif()
-
 project(${NAME} VERSION 0.1.0)
 
-# 1. Set VULKAN_SDK_PATH in .env.cmake to target specific vulkan version
+message(STATUS "")
+message(STATUS "Using ${CMAKE_GENERATOR}")
+
+# 1. VulkanSDK
 if (DEFINED VULKAN_SDK_PATH)
-  set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include") # 1.1 Make sure this include path is correct
-  set(Vulkan_LIBRARIES "${VULKAN_SDK_PATH}/Lib") # 1.2 Make sure lib path is correct
+  message(STATUS "Using Vulkan path specified")
   set(Vulkan_FOUND "True")
 else()
-  find_package(Vulkan REQUIRED) # throws error if could not find Vulkan
+  # Find Vulkan outside the project
+  find_package(Vulkan REQUIRED QUIET) # throws error if could not find Vulkan
   message(STATUS "Found Vulkan: $ENV{VULKAN_SDK}")
+  set(VULKAN_SDK_PATH $ENV{VULKAN_SDK})
 endif()
+
+set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include") # 1.1 Make sure this include path is correct
+set(Vulkan_LIBRARIES "${VULKAN_SDK_PATH}/Lib") # 1.2 Make sure lib path is correct
+
 if (NOT Vulkan_FOUND)
 	message(FATAL_ERROR "Could not find Vulkan library!")
 else()
-	message(STATUS "Using vulkan lib at: ${Vulkan_LIBRARIES}")
+	message(STATUS "Using Vulkan lib at: ${Vulkan_LIBRARIES}")
 endif()
 
-
-# 2. Set GLFW_PATH in .env.cmake to target specific glfw
-# or try fetching from git repo
+# 2. GLFW
 if (DEFINED GLFW_PATH)
   message(STATUS "Using GLFW path specified")
   set(GLFW_INCLUDE_DIRS "${GLFW_PATH}/include")
   if (MSVC)
-    set(GLFW_LIB "${GLFW_PATH}/lib-vc2022") # 2.1 Update lib-vc2019 to use same version as your visual studio
-  elseif (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
-    message(STATUS "USING MINGW")
-    set(GLFW_LIB "${GLFW_PATH}/lib-mingw-w64") # 2.1 make sure matches glfw mingw subdirectory
+    if (CMAKE_GENERATOR STREQUAL "Visual Studio 11 2012")
+      set(GLFW_LIB "${GLFW_PATH}/lib-vc2012")
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 12 2013")
+      set(GLFW_LIB "${GLFW_PATH}/lib-vc2013")
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 14 2015")
+      set(GLFW_LIB "${GLFW_PATH}/lib-vc2015")
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017")
+      set(GLFW_LIB "${GLFW_PATH}/lib-vc2017")
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+      set(GLFW_LIB "${GLFW_PATH}/lib-vc2019")
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
+      set(GLFW_LIB "${GLFW_PATH}/lib-vc2022")
+    else()
+      message(FATAL_ERROR "Visual Studio version not supported")
+    endif()
   endif()
 else()
+  # Find GLFW outside the project (NOT TESTED!!)
   find_package(glfw3 3.3 REQUIRED)
   set(GLFW_LIB glfw)
   message(STATUS "Found GLFW")
 endif()
 if (NOT GLFW_LIB)
-	message(FATAL_ERROR "Could not find glfw library!")
+	message(FATAL_ERROR "Could not find GLFW library!")
 else()
-	message(STATUS "Using glfw lib at: ${GLFW_LIB}")
+	message(STATUS "Using GLFW lib at: ${GLFW_LIB}")
 endif()
 
-# PugiXML
+# 3. GLM
+if (DEFINED GLM_PATH)
+  message(STATUS "Using GLM path specified")
+else()
+  message(FATAL_ERROR "Did not specify path for GLM! Automatic finding for this library is not supported yet")
+endif()
+
+# 4. TinyOBJ
+if (DEFINED TINYOBJ_PATH)
+  message(STATUS "Using TinyOBJ path specified")
+else()
+  message(FATAL_ERROR "Did not specify path for TinyOBJ! Automatic finding for this library is not supported yet")
+endif()
+
+# 5. PugiXML
 if (DEFINED PUGIXML_PATH)
-  message(STATUS "Using PUGIXML path specified")
+  message(STATUS "Using PugiXML path specified")
   set(PUGIXML_INCLUDE_DIRS "${PUGIXML_PATH}/src")
   if (MSVC)
-    set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2022/x64_Release")
+    if (CMAKE_GENERATOR STREQUAL "Visual Studio 11 2012")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2012/x64_Release") # Not built
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 12 2013")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2013/x64_Release") # Not built
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 14 2015")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2015/x64_Release") # Not built
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2017/x64_Release") # Not built
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2019/x64_Release") # Not built
+    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2022/x64_Release")
+    else()
+      message(FATAL_ERROR "Visual Studio version not supported")
+    endif()
   endif()
 else()
-  message(FATAL_ERROR "Could not find pugixml library!")
+  # Find PugiXML outside the project (NOT IMPLEMENTED!!)
+  message(FATAL_ERROR "Did not specify path for PugiXML library! Automatic finding for this library is not supported yet")
+endif()
+if (NOT PUGIXML_LIB)
+	message(FATAL_ERROR "Could not find PugiXML library!")
+else()
+	message(STATUS "Using PugiXML lib at: ${PUGIXML_LIB}")
 endif()
 
 include_directories(libs)
-
-# If TINYOBJ_PATH not specified in .env.cmake, try fetching from git repo
-if (NOT TINYOBJ_PATH)
-  message(STATUS "TINYOBJ_PATH not specified in .env.cmake, using libs/tinyobjloader")
-  set(TINYOBJ_PATH libs/tinyobjloader)
-endif()
 
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp ${PROJECT_SOURCE_DIR}/src/*.hpp)
 
@@ -85,26 +114,18 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/build")
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
 if (WIN32)
   message(STATUS "CREATING BUILD FOR WINDOWS")
 
-  if (USE_MINGW)
-    target_include_directories(${PROJECT_NAME} PUBLIC
-      ${MINGW_PATH}/include
-    )
-    target_link_directories(${PROJECT_NAME} PUBLIC
-      ${MINGW_PATH}/lib
-    )
-  endif()
-
   target_include_directories(${PROJECT_NAME} PUBLIC
     ${PROJECT_SOURCE_DIR}/src
     ${Vulkan_INCLUDE_DIRS}
-    ${TINYOBJ_PATH}
     ${GLFW_INCLUDE_DIRS}
-    ${PUGIXML_INCLUDE_DIRS}
     ${GLM_PATH}
+    ${TINYOBJ_PATH}
+    ${PUGIXML_INCLUDE_DIRS}
     )
 
   target_link_directories(${PROJECT_NAME} PUBLIC
@@ -135,8 +156,6 @@ find_program(GLSL_VALIDATOR glslangValidator HINTS
   /usr/local/bin 
   ${VULKAN_SDK_PATH}/Bin
   ${VULKAN_SDK_PATH}/Bin32
-  $ENV{VULKAN_SDK}/Bin/ 
-  $ENV{VULKAN_SDK}/Bin32/
 )
 
 # get all .vert and .frag files in shaders directory

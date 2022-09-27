@@ -19,7 +19,7 @@ namespace OmniV {
 		bool simpleRenderSystemEnable = true; // Always enabled
 		bool pointLightRenderSystemEnable = false;
 
-		int getCount() {
+		unsigned getCount() {
 			return simpleRenderSystemEnable + pointLightRenderSystemEnable;
 		}
 	};
