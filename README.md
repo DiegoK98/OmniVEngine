@@ -5,16 +5,16 @@ The Engine was initially based on the video tutorial series by [blurrypiano](htt
 
 ## Setup guide
 ### Pre-requisites
-- Download this repository.
 - Install CMake (minimum version 3.11.0).
-- Install Visual Studio 2022 (other versions, or even other IDEs can be used, but you will need to change the gen.bat content and CMakeLists accordingly).
-- Install Vulkan SDK (.env file contains the path for the SDK version to be used, change it accordingly).
+- Install Visual Studio (any version newer than VS2012 should be supported, but only VS2017, VS2019 and VS2022 are tested).
+- Install Vulkan SDK.
+- Download this repository.
+- Edit the gen.bat file, specifying the IDE you will use. If you are not using Visual Studio, you will need to adapt the CMakeLists.txt file to your needs (and get the built library files for your IDE).
 
 ### Setup
-- Execute gen.bat. This will generate the project files inside the build directory.
-- Open the solution in build.
-- Build the engine project in Release mode (Debug doesn't work right now).
+- Execute gen.bat. This will generate the full project inside the build directory.
+- Open the project solution with Visual Studio and run it in Release mode (Debug doesn't work right now).
 
 ## Important notes
-- Remember that after any change to the shaders content you will need to build the Shaders target, this will not happen automatically when building the engine project.
-- If the visual project doesn't detect newly created files, executing gen.bat should fix it
+- Remember that after any change to the shaders content, you will need to re-build the Shaders target, this will not happen automatically when building the default target.
+- If Visual Studio doesn't detect newly created files, executing gen.bat should fix it
