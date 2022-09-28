@@ -1,0 +1,1 @@
+D:\Documents\OmniVEngine\libs\pugixml\scripts\vs2022\x64_Debug\pugixml.lib

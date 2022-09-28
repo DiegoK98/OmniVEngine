@@ -32,15 +32,7 @@ if (DEFINED GLFW_PATH)
   message(STATUS "Using GLFW path specified")
   set(GLFW_INCLUDE_DIRS "${GLFW_PATH}/include")
   if (MSVC)
-    if (CMAKE_GENERATOR STREQUAL "Visual Studio 11 2012")
-      set(GLFW_LIB "${GLFW_PATH}/lib-vc2012")
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 12 2013")
-      set(GLFW_LIB "${GLFW_PATH}/lib-vc2013")
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 14 2015")
-      set(GLFW_LIB "${GLFW_PATH}/lib-vc2015")
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017")
-      set(GLFW_LIB "${GLFW_PATH}/lib-vc2017")
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+    if (CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
       set(GLFW_LIB "${GLFW_PATH}/lib-vc2019")
     elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
       set(GLFW_LIB "${GLFW_PATH}/lib-vc2022")
@@ -79,18 +71,10 @@ if (DEFINED PUGIXML_PATH)
   message(STATUS "Using PugiXML path specified")
   set(PUGIXML_INCLUDE_DIRS "${PUGIXML_PATH}/src")
   if (MSVC)
-    if (CMAKE_GENERATOR STREQUAL "Visual Studio 11 2012")
-      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2012/x64_Release") # Not built
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 12 2013")
-      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2013/x64_Release") # Not built
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 14 2015")
-      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2015/x64_Release") # Not built
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 15 2017")
-      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2017/x64_Release") # Not built
-    elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
-      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2019/x64_Release") # Not built
+    if (CMAKE_GENERATOR STREQUAL "Visual Studio 16 2019")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2019")
     elseif (CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
-      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2022/x64_Release")
+      set(PUGIXML_LIB "${PUGIXML_PATH}/scripts/vs2022")
     else()
       message(FATAL_ERROR "Visual Studio version not supported")
     endif()
@@ -131,10 +115,11 @@ if (WIN32)
   target_link_directories(${PROJECT_NAME} PUBLIC
     ${Vulkan_LIBRARIES}
     ${GLFW_LIB}
-    ${PUGIXML_LIB}
+    ${PUGIXML_LIB}/x64_Debug
+    ${PUGIXML_LIB}/x64_Release
   )
 
-  target_link_libraries(${PROJECT_NAME} glfw3 pugixml vulkan-1)
+  target_link_libraries(${PROJECT_NAME} glfw3 debug pugixml_debug optimized pugixml_release vulkan-1)
 elseif (UNIX)
     message(STATUS "CREATING BUILD FOR UNIX")
     target_include_directories(${PROJECT_NAME} PUBLIC
