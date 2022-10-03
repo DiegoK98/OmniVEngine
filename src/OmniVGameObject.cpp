@@ -75,7 +75,6 @@ namespace OmniV {
 
 			if (strcmp(it->name(), "rotation") == 0)
 			{
-				// Check for quaternions
 				if (it->attribute("value"))
 					rotation = toVector3f(it->attribute("value").value());
 				else
