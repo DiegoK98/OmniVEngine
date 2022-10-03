@@ -1,4 +1,4 @@
-﻿include(./libpaths.cmake OPTIONAL RESULT_VARIABLE LOCAL_ENV)
+﻿include(./.libpaths.cmake OPTIONAL RESULT_VARIABLE LOCAL_ENV)
 cmake_minimum_required(VERSION 3.11.0)
 
 set(NAME OmniV)
