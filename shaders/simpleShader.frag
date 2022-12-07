@@ -62,18 +62,18 @@ vec3 pointLightShade(Light light)
 	if(length(light.color.xyz) <= 0 || light.color.w == 0)
 		return shadeColor;
 
-	vec3 lightVec = fragPosWorld - light.position.xyz;
+	vec3 lightVec = light.position.xyz - fragPosWorld;
 	vec3 lightDir = normalize(lightVec);
 
 	vec3 lightIntensity = light.color.xyz * light.color.w;
 	
 	// Diffuse
-	float cosAngIncidence = max(dot(surfaceNormal, -lightDir), 0);
+	float cosAngIncidence = max(dot(surfaceNormal, lightDir), 0);
 
 	shadeColor += lightIntensity * cosAngIncidence;
 
 	// Specular
-	vec3 halfAngle = normalize(viewDirection - lightDir);
+	vec3 halfAngle = normalize(lightDir + viewDirection);
 	float blinnTerm = dot(surfaceNormal, halfAngle);
 	blinnTerm = clamp(blinnTerm, 0, 1);
 	blinnTerm = pow(blinnTerm, glossiness);
@@ -90,17 +90,17 @@ vec3 directionalLightShade(Light light)
 	if(length(light.color.xyz) <= 0 || light.color.w == 0)
 		return shadeColor;
 
-	vec3 lightDir = normalize(light.position.xyz);
-	vec3 halfAngle = normalize(viewDirection - lightDir);
+	vec3 lightDir = normalize(-light.position.xyz);
 
 	vec3 lightIntensity = light.color.xyz * light.color.w;
 
 	// Diffuse
-	float cosAngIncidence = max(dot(surfaceNormal, -lightDir), 0);
+	float cosAngIncidence = max(dot(surfaceNormal, lightDir), 0);
 
 	shadeColor += lightIntensity * cosAngIncidence;
 
 	// Specular
+	vec3 halfAngle = normalize(lightDir + viewDirection);
 	float blinnTerm = dot(surfaceNormal, halfAngle);
 	blinnTerm = clamp(blinnTerm, 0, 1);
 	blinnTerm = pow(blinnTerm, glossiness);
