@@ -11,10 +11,10 @@ namespace OmniV {
 		OmniVPointLightRenderSystem(const OmniVPointLightRenderSystem&) = delete;
 		OmniVPointLightRenderSystem& operator=(const OmniVPointLightRenderSystem&) = delete;
 
-		void render(FrameInfo& frameInfo) override;
+		void render(FrameInfo& frameInfo, uint32_t pipelineID = 0) override;
 
 	private:
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout) override;
-		void createPipeline(VkRenderPass renderPass) override;
+		void createPipeline(uint32_t pipelineID, PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath = "") override;
 	};
 }

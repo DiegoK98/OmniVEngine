@@ -11,9 +11,9 @@
 
 namespace OmniV {
 
-	OmniVPipeline::OmniVPipeline(OmniVDevice& device, const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo)
+	OmniVPipeline::OmniVPipeline(OmniVDevice& device, const PipelineConfigInfo& configInfo, const std::string& vertFilepath, const std::string& fragFilepath)
 		: omnivDevice{ device } {
-		createGraphicsPipeline(vertFilepath, fragFilepath, configInfo);
+		createGraphicsPipeline(configInfo, vertFilepath, fragFilepath);
 	}
 
 	OmniVPipeline::~OmniVPipeline() {
@@ -40,18 +40,16 @@ namespace OmniV {
 		return buffer;
 	}
 
-	void OmniVPipeline::createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo) {
-		assert(
-			configInfo.pipelineLayout != VK_NULL_HANDLE &&
-			"Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
-		assert(
-			configInfo.renderPass != VK_NULL_HANDLE &&
-			"Cannot create graphics pipeline: no renderPass provided in configInfo");
-		auto vertCode = readFile(WORKING_DIR "shaders/" + vertFilepath);
-		auto fragCode = readFile(WORKING_DIR "shaders/" + fragFilepath);
+	void OmniVPipeline::createGraphicsPipeline(const PipelineConfigInfo& configInfo, const std::string& vertFilepath, const std::string& fragFilepath) {
+		assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
+		assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
+		assert(configInfo.stagesCount > 0 && "Cannot create graphics pipeline: stagesCount has to be at least 1");
+		assert(configInfo.stagesCount < 3 && "Cannot create graphics pipeline: stagesCount cannot be higher than 2");
+		
+		createShaderModule(readFile(WORKING_DIR "shaders/" + vertFilepath), &vertShaderModule);
 
-		createShaderModule(vertCode, &vertShaderModule);
-		createShaderModule(fragCode, &fragShaderModule);
+		if (configInfo.stagesCount == 2)
+			createShaderModule(readFile(WORKING_DIR "shaders/" + fragFilepath), &fragShaderModule);
 
 		VkPipelineShaderStageCreateInfo shaderStages[2];
 
@@ -63,13 +61,14 @@ namespace OmniV {
 		shaderStages[0].pNext = nullptr;
 		shaderStages[0].pSpecializationInfo = nullptr;
 
-		shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		shaderStages[1].module = fragShaderModule;
-		shaderStages[1].pName = "main";
-		shaderStages[1].flags = 0;
-		shaderStages[1].pNext = nullptr;
-		shaderStages[1].pSpecializationInfo = nullptr;
+		if (configInfo.stagesCount == 2)
+			shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+			shaderStages[1].module = fragShaderModule;
+			shaderStages[1].pName = "main";
+			shaderStages[1].flags = 0;
+			shaderStages[1].pNext = nullptr;
+			shaderStages[1].pSpecializationInfo = nullptr;
 
 		auto& bindingDescriptions = configInfo.bindingDescriptions;
 		auto& attributeDescriptions = configInfo.attributeDescriptions;
@@ -82,7 +81,7 @@ namespace OmniV {
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = 2;
+		pipelineInfo.stageCount = configInfo.stagesCount;
 		pipelineInfo.pStages = shaderStages;
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
@@ -142,8 +141,8 @@ namespace OmniV {
 		configInfo.rasterizationInfo.rasterizerDiscardEnable = VK_FALSE;
 		configInfo.rasterizationInfo.polygonMode = VK_POLYGON_MODE_FILL;
 		configInfo.rasterizationInfo.lineWidth = 1.0f;
-		configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
-		configInfo.rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		configInfo.rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+		configInfo.rasterizationInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		configInfo.rasterizationInfo.depthBiasEnable = VK_FALSE;
 		configInfo.rasterizationInfo.depthBiasConstantFactor = 0.0f;  // Optional
 		configInfo.rasterizationInfo.depthBiasClamp = 0.0f;           // Optional
@@ -157,9 +156,7 @@ namespace OmniV {
 		configInfo.multisampleInfo.alphaToCoverageEnable = VK_FALSE;  // Optional
 		configInfo.multisampleInfo.alphaToOneEnable = VK_FALSE;       // Optional
 
-		configInfo.colorBlendAttachment.colorWriteMask =
-			VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
-			VK_COLOR_COMPONENT_A_BIT;
+		configInfo.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
 		configInfo.colorBlendAttachment.blendEnable = VK_FALSE;
 		configInfo.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;   // Optional
 		configInfo.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;  // Optional
@@ -181,7 +178,7 @@ namespace OmniV {
 		configInfo.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
 		configInfo.depthStencilInfo.depthTestEnable = VK_TRUE;
 		configInfo.depthStencilInfo.depthWriteEnable = VK_TRUE;
-		configInfo.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		configInfo.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
 		configInfo.depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
 		configInfo.depthStencilInfo.minDepthBounds = 0.0f;  // Optional
 		configInfo.depthStencilInfo.maxDepthBounds = 1.0f;  // Optional

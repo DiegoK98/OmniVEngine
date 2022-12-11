@@ -16,11 +16,19 @@
 #include <vector>
 
 #define MAX_LIGHTS 10
-#define MAX_GAME_OBJECTS  10000
+#define MAX_GAME_OBJECTS 10000
 #define MAX_CONCURRENT_RENDER_SYSTEMS 10
 
+#define SHADOWMAP_RES 2048
+#define SHADOWMAP_SIZE 5.0f
+
+//#define LIGHT_FOV 45.0f
+
+#define Z_NEAR 0.1f
+#define Z_FAR 10.0f
+
 // Should be an input from the scene or something
-// The actual way to do it would be to add behaviours/scripts that the user will create
+// The actual proper way to do it would be to add behaviours/scripts that the user will create
 // and attach to objects in a component system like Unity
 #define ROTATE_LIGHTS 0
 

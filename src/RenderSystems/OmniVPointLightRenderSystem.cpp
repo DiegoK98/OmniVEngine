@@ -23,7 +23,15 @@ namespace OmniV {
 	OmniVPointLightRenderSystem::OmniVPointLightRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 		: OmniVRenderSystem(device) {
 		createPipelineLayout(globalSetLayout);
-		createPipeline(renderPass);
+
+		PipelineConfigInfo pipelineConfig{};
+		OmniVPipeline::defaultPipelineConfigInfo(pipelineConfig);
+		OmniVPipeline::enableAlphaBlending(pipelineConfig);
+		pipelineConfig.stagesCount = 2;
+		pipelineConfig.attributeDescriptions.clear();
+		pipelineConfig.bindingDescriptions.clear();
+		pipelineConfig.renderPass = renderPass;
+		createPipeline(0, pipelineConfig, "pointLightBillboard.vert.spv", "pointLightBillboard.frag.spv");
 	}
 
 	OmniVPointLightRenderSystem::~OmniVPointLightRenderSystem() {}
@@ -48,24 +56,14 @@ namespace OmniV {
 		}
 	}
 
-	void OmniVPointLightRenderSystem::createPipeline(VkRenderPass renderPass) {
+	void OmniVPointLightRenderSystem::createPipeline(uint32_t pipelineID, PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath) {
 		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
-		PipelineConfigInfo pipelineConfig{};
-		OmniVPipeline::defaultPipelineConfigInfo(pipelineConfig);
-		OmniVPipeline::enableAlphaBlending(pipelineConfig);
-		pipelineConfig.attributeDescriptions.clear();
-		pipelineConfig.bindingDescriptions.clear();
-		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
-		omnivPipeline = std::make_unique<OmniVPipeline>(
-			omnivDevice,
-			"pointLightBillboard.vert.spv",
-			"pointLightBillboard.frag.spv",
-			pipelineConfig);
+		omnivPipeline = std::make_unique<OmniVPipeline>(omnivDevice, pipelineConfig, vertFilepath, fragFilepath);
 	}
 
-	void OmniVPointLightRenderSystem::render(FrameInfo& frameInfo) {
+	void OmniVPointLightRenderSystem::render(FrameInfo& frameInfo, uint32_t pipelineID) {
 		// sort lights
 		std::map<float, OmniVGameObject::id_t> sorted;
 

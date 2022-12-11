@@ -92,8 +92,7 @@ namespace OmniV {
 		descriptorPoolInfo.maxSets = maxSets;
 		descriptorPoolInfo.flags = poolFlags;
 
-		if (vkCreateDescriptorPool(omnivDevice.device(), &descriptorPoolInfo, nullptr, &descriptorPool) !=
-			VK_SUCCESS) {
+		if (vkCreateDescriptorPool(omnivDevice.device(), &descriptorPoolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create descriptor pool!");
 		}
 	}
@@ -102,8 +101,7 @@ namespace OmniV {
 		vkDestroyDescriptorPool(omnivDevice.device(), descriptorPool, nullptr);
 	}
 
-	bool OmniVDescriptorPool::allocateDescriptor(
-		const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
+	bool OmniVDescriptorPool::allocateDescriptor(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const {
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = descriptorPool;

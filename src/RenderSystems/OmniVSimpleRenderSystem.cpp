@@ -18,10 +18,29 @@ namespace OmniV {
 		glm::mat4 normalMat{ 1.f };
 	};
 
-	OmniVSimpleRenderSystem::OmniVSimpleRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+	OmniVSimpleRenderSystem::OmniVSimpleRenderSystem(OmniVDevice& device, VkRenderPass offscreenRenderPass, VkRenderPass sceneRenderPass, VkDescriptorSetLayout globalSetLayout)
 		: OmniVRenderSystem(device) {
 		createPipelineLayout(globalSetLayout);
-		createPipeline(renderPass);
+
+		PipelineConfigInfo pipelineConfig{};
+		OmniVPipeline::defaultPipelineConfigInfo(pipelineConfig);
+		pipelineConfig.stagesCount = 2;
+		pipelineConfig.renderPass = sceneRenderPass;
+		createPipeline(0, pipelineConfig, "scene.vert.spv", "scene.frag.spv");
+
+		pipelineConfig.stagesCount = 1;
+		pipelineConfig.renderPass = offscreenRenderPass;
+		pipelineConfig.colorBlendInfo.attachmentCount = 0;
+		pipelineConfig.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+		pipelineConfig.rasterizationInfo.depthBiasEnable = VK_TRUE;
+		pipelineConfig.rasterizationInfo.cullMode = VK_CULL_MODE_FRONT_BIT; // Prevents peter-panning
+		pipelineConfig.dynamicStateEnables.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
+		pipelineConfig.dynamicStateInfo = {};
+		pipelineConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		pipelineConfig.dynamicStateInfo.pDynamicStates = pipelineConfig.dynamicStateEnables.data();
+		pipelineConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(pipelineConfig.dynamicStateEnables.size());
+		pipelineConfig.dynamicStateInfo.flags = 0;
+		createPipeline(1, pipelineConfig, "offscreen.vert.spv");
 	}
 
 	OmniVSimpleRenderSystem::~OmniVSimpleRenderSystem() {}
@@ -46,32 +65,24 @@ namespace OmniV {
 		}
 	}
 
-	void OmniVSimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
+	void OmniVSimpleRenderSystem::createPipeline(uint32_t pipelineID, PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath) {
 		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
-		PipelineConfigInfo pipelineConfig{};
-		OmniVPipeline::defaultPipelineConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
-		omnivPipeline = std::make_unique<OmniVPipeline>(
-			omnivDevice,
-			"simpleShader.vert.spv",
-			"simpleShader.frag.spv",
-			pipelineConfig);
+		if (pipelineID == 0)
+			omnivPipeline = std::make_unique<OmniVPipeline>(omnivDevice, pipelineConfig, vertFilepath, fragFilepath);
+		else
+			omnivOffscreenPipeline = std::make_unique<OmniVPipeline>(omnivDevice, pipelineConfig, vertFilepath, fragFilepath);
 	}
 
-	void OmniVSimpleRenderSystem::render(FrameInfo& frameInfo) {
-		omnivPipeline->bind(frameInfo.commandBuffer);
+	void OmniVSimpleRenderSystem::render(FrameInfo& frameInfo, uint32_t pipelineID) {
+		// Main scene render
+		if (pipelineID == 0)
+			omnivPipeline->bind(frameInfo.commandBuffer);
+		else
+			omnivOffscreenPipeline->bind(frameInfo.commandBuffer);
 
-		vkCmdBindDescriptorSets(
-			frameInfo.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			pipelineLayout,
-			0,
-			1,
-			&frameInfo.globalDescriptorSet,
-			0,
-			nullptr);
+		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
 
 		for (auto& kv : frameInfo.gameObjects) {
 			auto& obj = kv.second;
@@ -83,13 +94,7 @@ namespace OmniV {
 			push.modelMat = obj.transform.mat4();
 			push.normalMat = obj.transform.normalMatrix();
 
-			vkCmdPushConstants(
-				frameInfo.commandBuffer,
-				pipelineLayout,
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(SimplePushConstantData),
-				&push);
+			vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 
 			obj.model->bind(frameInfo.commandBuffer);
 			obj.model->draw(frameInfo.commandBuffer);

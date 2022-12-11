@@ -27,8 +27,7 @@ namespace OmniV {
             std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings{};
         };
 
-        OmniVDescriptorSetLayout(
-            OmniVDevice& omnivDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
+        OmniVDescriptorSetLayout(OmniVDevice& omnivDevice, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings);
         ~OmniVDescriptorSetLayout();
         OmniVDescriptorSetLayout(const OmniVDescriptorSetLayout&) = delete;
         OmniVDescriptorSetLayout& operator=(const OmniVDescriptorSetLayout&) = delete;
@@ -61,17 +60,12 @@ namespace OmniV {
             VkDescriptorPoolCreateFlags poolFlags = 0;
         };
 
-        OmniVDescriptorPool(
-            OmniVDevice& omnivDevice,
-            uint32_t maxSets,
-            VkDescriptorPoolCreateFlags poolFlags,
-            const std::vector<VkDescriptorPoolSize>& poolSizes);
+        OmniVDescriptorPool(OmniVDevice& omnivDevice, uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags, const std::vector<VkDescriptorPoolSize>& poolSizes);
         ~OmniVDescriptorPool();
         OmniVDescriptorPool(const OmniVDescriptorPool&) = delete;
         OmniVDescriptorPool& operator=(const OmniVDescriptorPool&) = delete;
 
-        bool allocateDescriptor(
-            const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
+        bool allocateDescriptor(const VkDescriptorSetLayout descriptorSetLayout, VkDescriptorSet& descriptor) const;
 
         void freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const;
 

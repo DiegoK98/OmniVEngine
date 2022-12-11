@@ -42,8 +42,14 @@
     </transform>
   </mesh>
 
-  <!--Lights-->
+  <!--Sun light-->
+  <light type="directional">
+    <radiance value="1.0 0.85 0.6"/>
+    <intensity value="0.2"/>
+    <direction value="1 1 0"/>
+  </light>
 
+  <!--Other lights-->
   <light type="point">
     <radiance value="1.0 0.1 0.1"/>
     <intensity value="0.2"/>
@@ -96,13 +102,6 @@
     <transform>
       <position value="-1.366 -0.3 0.366"/>
     </transform>
-  </light>
-
-  <!--Sun light-->
-  <light type="directional">
-    <radiance value="1.0 0.85 0.6"/>
-    <intensity value="0.2"/>
-    <direction value="1 1 0"/>
   </light>
 
 </scene>

@@ -20,10 +20,10 @@
 namespace OmniV {
 
 	OmniVEngineApp::OmniVEngineApp() {
-		globalPool =
-			OmniVDescriptorPool::Builder(omnivDevice)
+		globalPool = OmniVDescriptorPool::Builder(omnivDevice)
 			.setMaxSets(OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
 	}
 
@@ -34,24 +34,27 @@ namespace OmniV {
 		// Global UBOs and their descriptors
 		std::vector<std::unique_ptr<OmniVBuffer>> uboBuffers(OmniVSwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < uboBuffers.size(); i++) {
-			uboBuffers[i] = std::make_unique<OmniVBuffer>(
-				omnivDevice,
-				sizeof(GlobalUbo),
-				1,
-				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			uboBuffers[i] = std::make_unique<OmniVBuffer>(omnivDevice, sizeof(GlobalUbo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 			uboBuffers[i]->map();
 		}
 
+		// This is temporary and should eventually be replaced with a proper class for images/samplers (similar to OmniVBuffer)
+		VkDescriptorImageInfo shadowmapImageInfo{};
+		shadowmapImageInfo.sampler = omnivRenderer.getShadowmapSampler();
+		shadowmapImageInfo.imageView = omnivRenderer.getShadowmapImageView();
+		shadowmapImageInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
+
 		auto globalSetLayout = OmniVDescriptorSetLayout::Builder(omnivDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(OmniVSwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < globalDescriptorSets.size(); i++) {
-			auto bufferInfo = uboBuffers[i]->descriptorInfo();
+			auto globalBufferInfo = uboBuffers[i]->descriptorInfo();
 			OmniVDescriptorWriter(*globalSetLayout, *globalPool)
-				.writeBuffer(0, &bufferInfo)
+				.writeBuffer(0, &globalBufferInfo)
+				.writeImage(1, &shadowmapImageInfo)
 				.build(globalDescriptorSets[i]);
 		}
 
@@ -59,10 +62,10 @@ namespace OmniV {
 		// Warning!!!: The RenderSystem objects are constructed even if the rendersystem is not enabled, which is really bad
 		OmniVRenderSystem* renderSystems[MAX_CONCURRENT_RENDER_SYSTEMS] = {};
 
-		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getShadowmapRenderPass(), omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 		if (enabledSystems.simpleRenderSystemEnable) renderSystems[0] = &simpleRenderSystem;
 
-		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 		if (enabledSystems.pointLightRenderSystemEnable) renderSystems[1] = &pointLightSystem;
 
 		// Create player controller
@@ -90,27 +93,41 @@ namespace OmniV {
 				int frameIndex = omnivRenderer.getFrameIndex();
 				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex], gameObjects };
 
-				// Update matrices
+				// Update UBO
 				GlobalUbo ubo{};
+
 				ubo.viewMat = camera.getView();
 				ubo.inverseViewMat = camera.getInverseView();
 				ubo.projMat = camera.getProjection();
 				ubo.ambientLight = renderSettings.ambientLight;
 
-				// Update lights
 				updateLights(frameInfo, ubo);
 
-				// Upload UBO
+				// Matrix from light's point of view (directional lights only)
+				glm::mat4 depthProjectionMatrix = glm::ortho(-SHADOWMAP_SIZE, SHADOWMAP_SIZE, -SHADOWMAP_SIZE, SHADOWMAP_SIZE, Z_NEAR, Z_FAR);
+				glm::mat4 depthViewMatrix = glm::lookAt(glm::vec3(-ubo.lights[0].position), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+				ubo.depthBiasMat = depthProjectionMatrix * depthViewMatrix;
+
+				// Upload UBOs
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
-				// RenderPass
+				// Offscreen render pass
+				omnivRenderer.beginShadowmapRenderPass(commandBuffer);
+
+				renderSystems[0]->render(frameInfo, 1);
+
+				omnivRenderer.endRenderPass(commandBuffer);
+
+				// Scene render pass
 				omnivRenderer.beginSwapChainRenderPass(commandBuffer);
 
 				for (unsigned i = 0; i < enabledSystems.getCount(); i++)
 					renderSystems[i]->render(frameInfo);
 
-				omnivRenderer.endSwapChainRenderPass(commandBuffer);
+				omnivRenderer.endRenderPass(commandBuffer);
+
 				omnivRenderer.endFrame();
 			}
 		}

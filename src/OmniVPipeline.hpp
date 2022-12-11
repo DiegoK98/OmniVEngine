@@ -13,6 +13,7 @@ namespace OmniV {
 		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
 		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
 
+		uint32_t stagesCount = 2;
 		std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
 		std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 		VkPipelineViewportStateCreateInfo viewportInfo;
@@ -31,7 +32,7 @@ namespace OmniV {
 
 	class OmniVPipeline {
 	public:
-		OmniVPipeline(OmniVDevice& device, const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
+		OmniVPipeline(OmniVDevice& device, const PipelineConfigInfo& configInfo, const std::string& vertFilepath, const std::string& fragFilepath = "");
 
 		~OmniVPipeline();
 
@@ -46,13 +47,13 @@ namespace OmniV {
 	private:
 		static std::vector<char> readFile(const std::string& filename);
 
-		void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
+		void createGraphicsPipeline(const PipelineConfigInfo& configInfo, const std::string& vertFilepath, const std::string& fragFilepath);
 
 		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
 		OmniVDevice& omnivDevice;
 		VkPipeline graphicsPipeline;
-		VkShaderModule vertShaderModule;
-		VkShaderModule fragShaderModule;
+		VkShaderModule vertShaderModule = VK_NULL_HANDLE;
+		VkShaderModule fragShaderModule = VK_NULL_HANDLE;
 	};
 }
