@@ -16,7 +16,7 @@ namespace OmniV {
 	OmniVOffscreenRenderer::~OmniVOffscreenRenderer() {  }
 
 	void OmniVOffscreenRenderer::beginShadowmapRenderPass(VkCommandBuffer commandBuffer) {
-		assert(isFrameStarted && "Can't call beginShadowmapRenderPass if frame is not in progress");
+		assert(omnivRenderer.isFrameInProgress() && "Can't call beginShadowmapRenderPass if frame is not in progress");
 		assert(commandBuffer == omnivRenderer.getCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame");
 
 		std::array<VkClearValue, 2> clearValues{};
@@ -52,8 +52,8 @@ namespace OmniV {
 	}
 
 	void OmniVOffscreenRenderer::endShadowmapRenderPass(VkCommandBuffer commandBuffer) {
-		assert(isFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress");
-		assert(commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame");
+		assert(omnivRenderer.isFrameInProgress() && "Can't call endSwapChainRenderPass if frame is not in progress");
+		assert(commandBuffer == omnivRenderer.getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame");
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
@@ -111,20 +111,6 @@ namespace OmniV {
 		if (vkCreateSampler(omnivDevice.device(), &samplerInfo, nullptr, &shadowmapSampler) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create sampler!");
 		}
-
-		// Shadowmap depth FBO
-		VkFramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = shadowmapRenderPass;
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = &shadowmapDepthImageView;
-		framebufferInfo.width = SHADOWMAP_RES;
-		framebufferInfo.height = SHADOWMAP_RES;
-		framebufferInfo.layers = 1;
-
-		if (vkCreateFramebuffer(omnivDevice.device(), &framebufferInfo, nullptr, &shadowmapDepthFramebuffer) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create framebuffer!");
-		}
 	}
 
 	void OmniVOffscreenRenderer::createShadowmapRenderPass() {
@@ -179,6 +165,20 @@ namespace OmniV {
 
 		if (vkCreateRenderPass(omnivDevice.device(), &renderPassInfo, nullptr, &shadowmapRenderPass) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create render pass!");
+		}
+
+		// Create shadowmap depth FBO
+		VkFramebufferCreateInfo framebufferInfo = {};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = shadowmapRenderPass;
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = &shadowmapDepthImageView;
+		framebufferInfo.width = SHADOWMAP_RES;
+		framebufferInfo.height = SHADOWMAP_RES;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(omnivDevice.device(), &framebufferInfo, nullptr, &shadowmapDepthFramebuffer) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create framebuffer!");
 		}
 	}
 
