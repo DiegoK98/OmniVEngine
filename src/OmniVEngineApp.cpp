@@ -23,7 +23,7 @@ namespace OmniV {
 		globalPool = OmniVDescriptorPool::Builder(omnivDevice)
 			.setMaxSets(OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, OmniVSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1)
 			.build();
 	}
 
@@ -116,6 +116,7 @@ namespace OmniV {
 				// Offscreen render pass
 				omnivRenderer.beginShadowmapRenderPass(commandBuffer);
 
+				// Render all shadowmaps
 				renderSystems[0]->render(frameInfo, 1);
 
 				omnivRenderer.endRenderPass(commandBuffer);
