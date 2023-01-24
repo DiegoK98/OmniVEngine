@@ -13,7 +13,17 @@ namespace OmniV {
 		createShadowmapRenderPass();
 	}
 
-	OmniVOffscreenRenderer::~OmniVOffscreenRenderer() {  }
+	OmniVOffscreenRenderer::~OmniVOffscreenRenderer() { 
+		vkDestroySampler(omnivDevice.device(), shadowmapSampler, nullptr);
+
+		vkDestroyFramebuffer(omnivDevice.device(), shadowmapDepthFramebuffer, nullptr);
+
+		vkDestroyImageView(omnivDevice.device(), shadowmapDepthImageView, nullptr);
+		vkDestroyImage(omnivDevice.device(), shadowmapDepthImage, nullptr);
+		vkFreeMemory(omnivDevice.device(), shadowmapDepthImageMemory, nullptr);
+
+		vkDestroyRenderPass(omnivDevice.device(), shadowmapRenderPass, nullptr);
+	}
 
 	void OmniVOffscreenRenderer::beginShadowmapRenderPass(VkCommandBuffer commandBuffer) {
 		assert(omnivRenderer.isFrameInProgress() && "Can't call beginShadowmapRenderPass if frame is not in progress");

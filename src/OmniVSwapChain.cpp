@@ -55,18 +55,6 @@ namespace OmniV {
 
 		vkDestroyRenderPass(device.device(), renderPass, nullptr);
 
-		// Shadowmap pass
-
-		//vkDestroySampler(device.device(), shadowmapSampler, nullptr);
-
-		//vkDestroyFramebuffer(device.device(), shadowmapDepthFramebuffer, nullptr);
-
-		//vkDestroyImageView(device.device(), shadowmapDepthImageView, nullptr);
-		//vkDestroyImage(device.device(), shadowmapDepthImage, nullptr);
-		//vkFreeMemory(device.device(), shadowmapDepthImageMemory, nullptr);
-
-		//vkDestroyRenderPass(device.device(), shadowmapRenderPass, nullptr);
-
 		// cleanup synchronization objects
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
 			vkDestroySemaphore(device.device(), renderFinishedSemaphores[i], nullptr);
