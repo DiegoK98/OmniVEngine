@@ -19,11 +19,11 @@ namespace OmniV {
 		OmniVRenderSystem(const OmniVRenderSystem&) = delete;
 		OmniVRenderSystem& operator=(const OmniVRenderSystem&) = delete;
 
-		virtual void render(FrameInfo& frameInfo, uint32_t pipelineID = 0) = 0;
+		virtual void render(FrameInfo& frameInfo) = 0;
 
 	private:
 		virtual void createPipelineLayout(VkDescriptorSetLayout globalSetLayout) = 0;
-		virtual void createPipeline(uint32_t pipelineID, PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath = "") = 0;
+		virtual void createPipeline(PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath = "") = 0;
 
 	protected:
 		OmniVDevice& omnivDevice;

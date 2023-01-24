@@ -31,7 +31,7 @@ namespace OmniV {
 		pipelineConfig.attributeDescriptions.clear();
 		pipelineConfig.bindingDescriptions.clear();
 		pipelineConfig.renderPass = renderPass;
-		createPipeline(0, pipelineConfig, "pointLightBillboard.vert.spv", "pointLightBillboard.frag.spv");
+		createPipeline(pipelineConfig, "pointLightBillboard.vert.spv", "pointLightBillboard.frag.spv");
 	}
 
 	OmniVPointLightRenderSystem::~OmniVPointLightRenderSystem() {}
@@ -56,14 +56,14 @@ namespace OmniV {
 		}
 	}
 
-	void OmniVPointLightRenderSystem::createPipeline(uint32_t pipelineID, PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath) {
+	void OmniVPointLightRenderSystem::createPipeline(PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath) {
 		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		omnivPipeline = std::make_unique<OmniVPipeline>(omnivDevice, pipelineConfig, vertFilepath, fragFilepath);
 	}
 
-	void OmniVPointLightRenderSystem::render(FrameInfo& frameInfo, uint32_t pipelineID) {
+	void OmniVPointLightRenderSystem::render(FrameInfo& frameInfo) {
 		// sort lights
 		std::map<float, OmniVGameObject::id_t> sorted;
 

@@ -2,6 +2,7 @@
 #include "OmniVBuffer.hpp"
 #include "OmniVKeyboardMovementController.hpp"
 #include "RenderSystems/OmniVSimpleRenderSystem.hpp"
+#include "RenderSystems/OmniVShadowmapRenderSystem.hpp"
 #include "RenderSystems/OmniVPointLightRenderSystem.hpp"
 
 // libs
@@ -62,7 +63,10 @@ namespace OmniV {
 		// Warning!!!: The RenderSystem objects are constructed even if the rendersystem is not enabled, which is really bad
 		OmniVRenderSystem* renderSystems[MAX_CONCURRENT_RENDER_SYSTEMS] = {};
 
-		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getShadowmapRenderPass(), omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+		// Shadowmap system is separated from the rest because we want to render shadowmaps in a different render pass than everything else
+		OmniVShadowmapRenderSystem shadowmapRenderSystem{ omnivDevice, omnivRenderer.getShadowmapRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+
+		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 		if (enabledSystems.simpleRenderSystemEnable) renderSystems[0] = &simpleRenderSystem;
 
 		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
@@ -117,7 +121,7 @@ namespace OmniV {
 				omnivRenderer.beginShadowmapRenderPass(commandBuffer);
 
 				// Render all shadowmaps
-				renderSystems[0]->render(frameInfo, 1);
+				shadowmapRenderSystem.render(frameInfo);
 
 				omnivRenderer.endRenderPass(commandBuffer);
 

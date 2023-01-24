@@ -1,4 +1,4 @@
-#include "OmniVSimpleRenderSystem.hpp"
+#include "OmniVShadowmapRenderSystem.hpp"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -18,20 +18,30 @@ namespace OmniV {
 		glm::mat4 normalMat{ 1.f };
 	};
 
-	OmniVSimpleRenderSystem::OmniVSimpleRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+	OmniVShadowmapRenderSystem::OmniVShadowmapRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
 		: OmniVRenderSystem(device) {
 		createPipelineLayout(globalSetLayout);
 
 		PipelineConfigInfo pipelineConfig{};
 		OmniVPipeline::defaultPipelineConfigInfo(pipelineConfig);
-		pipelineConfig.stagesCount = 2;
+		pipelineConfig.stagesCount = 1;
 		pipelineConfig.renderPass = renderPass;
-		createPipeline(pipelineConfig, "scene.vert.spv", "scene.frag.spv");
+		pipelineConfig.colorBlendInfo.attachmentCount = 0;
+		pipelineConfig.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL;
+		pipelineConfig.rasterizationInfo.depthBiasEnable = VK_TRUE;
+		pipelineConfig.rasterizationInfo.cullMode = VK_CULL_MODE_FRONT_BIT; // Prevents peter-panning
+		pipelineConfig.dynamicStateEnables.push_back(VK_DYNAMIC_STATE_DEPTH_BIAS);
+		pipelineConfig.dynamicStateInfo = {};
+		pipelineConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		pipelineConfig.dynamicStateInfo.pDynamicStates = pipelineConfig.dynamicStateEnables.data();
+		pipelineConfig.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(pipelineConfig.dynamicStateEnables.size());
+		pipelineConfig.dynamicStateInfo.flags = 0;
+		createPipeline(pipelineConfig, "offscreen.vert.spv");
 	}
 
-	OmniVSimpleRenderSystem::~OmniVSimpleRenderSystem() {}
+	OmniVShadowmapRenderSystem::~OmniVShadowmapRenderSystem() {}
 
-	void OmniVSimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
+	void OmniVShadowmapRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstantRange.offset = 0;
@@ -51,14 +61,14 @@ namespace OmniV {
 		}
 	}
 
-	void OmniVSimpleRenderSystem::createPipeline(PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath) {
+	void OmniVShadowmapRenderSystem::createPipeline(PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath) {
 		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
 		pipelineConfig.pipelineLayout = pipelineLayout;
 		omnivPipeline = std::make_unique<OmniVPipeline>(omnivDevice, pipelineConfig, vertFilepath, fragFilepath);
 	}
 
-	void OmniVSimpleRenderSystem::render(FrameInfo& frameInfo) {
+	void OmniVShadowmapRenderSystem::render(FrameInfo& frameInfo) {
 		omnivPipeline->bind(frameInfo.commandBuffer);
 
 		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
