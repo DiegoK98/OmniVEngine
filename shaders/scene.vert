@@ -45,7 +45,7 @@ void main() {
 	fragPosWorld = positionWorld.xyz;
 	fragNormalWorld = normalize(mat3(push.normalMat) * normal);
 
-	// For shadowmapping
+	// For shadowmap
 	fragPosLightSpace = biasMat * ubo.depthBiasMat * vec4(fragPosWorld, 1.0);
 
 	gl_Position = ubo.projMat * ubo.viewMat * vec4(fragPosWorld, 1.0);

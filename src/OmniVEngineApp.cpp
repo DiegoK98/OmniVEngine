@@ -41,8 +41,8 @@ namespace OmniV {
 
 		// This is temporary and should eventually be replaced with a proper class for images/samplers (similar to OmniVBuffer)
 		VkDescriptorImageInfo shadowmapImageInfo{};
-		shadowmapImageInfo.sampler = omnivRenderer.getShadowmapSampler();
-		shadowmapImageInfo.imageView = omnivRenderer.getShadowmapImageView();
+		shadowmapImageInfo.sampler = omnivShadowmapRenderer.getShadowmapSampler();
+		shadowmapImageInfo.imageView = omnivShadowmapRenderer.getShadowmapImageView();
 		shadowmapImageInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
 		auto globalSetLayout = OmniVDescriptorSetLayout::Builder(omnivDevice)
@@ -64,7 +64,7 @@ namespace OmniV {
 		OmniVRenderSystem* renderSystems[MAX_CONCURRENT_RENDER_SYSTEMS] = {};
 
 		// Shadowmap system is separated from the rest because we want to render shadowmaps in a different render pass than everything else
-		OmniVShadowmapRenderSystem shadowmapRenderSystem{ omnivDevice, omnivRenderer.getShadowmapRenderPass(), globalSetLayout->getDescriptorSetLayout() };
+		OmniVShadowmapRenderSystem shadowmapRenderSystem{ omnivDevice, omnivShadowmapRenderer.getShadowmapRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 
 		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 		if (enabledSystems.simpleRenderSystemEnable) renderSystems[0] = &simpleRenderSystem;
@@ -118,12 +118,12 @@ namespace OmniV {
 				uboBuffers[frameIndex]->flush();
 
 				// Offscreen render pass
-				omnivRenderer.beginShadowmapRenderPass(commandBuffer);
+				omnivShadowmapRenderer.beginShadowmapRenderPass(commandBuffer);
 
 				// Render all shadowmaps
 				shadowmapRenderSystem.render(frameInfo);
 
-				omnivRenderer.endRenderPass(commandBuffer);
+				omnivShadowmapRenderer.endShadowmapRenderPass(commandBuffer);
 
 				// Scene render pass
 				omnivRenderer.beginSwapChainRenderPass(commandBuffer);
@@ -131,7 +131,7 @@ namespace OmniV {
 				for (unsigned i = 0; i < enabledSystems.getCount(); i++)
 					renderSystems[i]->render(frameInfo);
 
-				omnivRenderer.endRenderPass(commandBuffer);
+				omnivRenderer.endSwapChainRenderPass(commandBuffer);
 
 				omnivRenderer.endFrame();
 			}

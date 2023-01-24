@@ -24,17 +24,11 @@ namespace OmniV {
 		OmniVSwapChain operator=(const OmniVSwapChain&) = delete;
 
 		VkFramebuffer getFrameBuffer(int frameIndex) { return swapChainFramebuffers[frameIndex]; }
-		VkFramebuffer getShadowmapFrameBuffer() { return shadowmapDepthFramebuffer; }
 		VkRenderPass getRenderPass() { return renderPass; }
-		VkRenderPass getShadowmapRenderPass() { return shadowmapRenderPass; }
 		VkImageView getImageView(int frameIndex) { return swapChainImageViews[frameIndex]; }
 		size_t imageCount() { return swapChainImages.size(); }
 		VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
 		VkExtent2D getSwapChainExtent() { return swapChainExtent; }
-		VkExtent2D getShadowmapExtent() { return VkExtent2D{ SHADOWMAP_RES, SHADOWMAP_RES }; }
-
-		VkSampler getShadowmapSampler() { return shadowmapSampler; }
-		VkImageView getShadowmapImageView() { return shadowmapDepthImageView; }
 
 		float extentAspectRatio() {
 			return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
@@ -54,8 +48,6 @@ namespace OmniV {
 		void createRenderPass();
 		void createDepthResources();
 		void createFramebuffers();
-		void createShadowmappingRenderPass();
-		void createShadowmappingResources();
 		void createSyncObjects();
 
 		// Helper functions
@@ -77,17 +69,6 @@ namespace OmniV {
 		std::vector<VkImageView> depthImageViews;
 		std::vector<VkImage> swapChainImages;
 		std::vector<VkImageView> swapChainImageViews;
-
-		// Shadowmap pass
-		VkFramebuffer shadowmapDepthFramebuffer;
-		VkRenderPass shadowmapRenderPass;
-
-		// Shadowmap pass resources
-		VkImage shadowmapDepthImage;
-		VkDeviceMemory shadowmapDepthImageMemory;
-		VkImageView shadowmapDepthImageView;
-
-		VkSampler shadowmapSampler;
 
 		OmniVDevice& device;
 		VkExtent2D windowExtent;

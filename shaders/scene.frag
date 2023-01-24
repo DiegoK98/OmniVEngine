@@ -154,7 +154,7 @@ vec3 directionalLightShade(Light light)
 
 	shadeColor += lightIntensity * blinnTerm;
 
-	// Apply shadowmapping
+	// Apply shadowmap
 	shadeColor *= shadowFuncPCF(fragPosLightSpace);
 
 	return shadeColor;

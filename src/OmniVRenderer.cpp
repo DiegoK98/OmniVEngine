@@ -139,43 +139,7 @@ namespace OmniV {
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    void OmniVRenderer::beginShadowmapRenderPass(VkCommandBuffer commandBuffer) {
-        assert(isFrameStarted && "Can't call beginShadowmapRenderPass if frame is not in progress");
-        assert(commandBuffer == getCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame");
-
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].depthStencil = { 1.0f, 0 };
-
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = omnivSwapChain->getShadowmapRenderPass();
-        renderPassInfo.framebuffer = omnivSwapChain->getShadowmapFrameBuffer();
-
-        renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = omnivSwapChain->getShadowmapExtent();
-
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = clearValues.data();
-
-        vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        VkViewport viewport{};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = static_cast<float>(omnivSwapChain->getShadowmapExtent().width);
-        viewport.height = static_cast<float>(omnivSwapChain->getShadowmapExtent().height);
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        VkRect2D scissor{ {0, 0}, omnivSwapChain->getShadowmapExtent() };
-        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-        // Set depth bias (aka "Polygon offset")
-        // Required to avoid shadow mapping artifacts
-        vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
-    }
-
-    void OmniVRenderer::endRenderPass(VkCommandBuffer commandBuffer) {
+    void OmniVRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         assert(isFrameStarted && "Can't call endSwapChainRenderPass if frame is not in progress");
         assert(commandBuffer == getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame");
         vkCmdEndRenderPass(commandBuffer);
