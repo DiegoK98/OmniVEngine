@@ -23,6 +23,12 @@ namespace OmniV {
 		const glm::mat4& getInverseView() const { return inverseViewMatrix; }
 		const glm::mat4& getProjection() const { return projectionMatrix; }
 		const glm::vec3 getPosition() const { return glm::vec3(inverseViewMatrix[3]); }
+		const glm::vec3 getForward() const { return glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]); }
+		const glm::vec3 getUp() const { return glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]); }
+		const glm::vec3 getRight() const { return glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]); }
+		const float getNear() const { return near; }
+		const float getFar() const { return far; }
+		const float getFovY() const { return fovY; }
 
 	private:
 		glm::mat4 projectionMatrix{ 1.f };
@@ -37,7 +43,7 @@ namespace OmniV {
 		void setViewYXZ();
 
 		float near = 0.1f;
-		float far = 100.f;
+		float far = 100.0f;
 		bool isPerspective = true;
 
 		float fovY = glm::radians(50.f);

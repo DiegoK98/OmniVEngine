@@ -138,6 +138,7 @@ vec3 directionalLightShade(Light light)
 	if(length(light.color.xyz) <= 0 || light.color.w == 0)
 		return shadeColor;
 
+	// light.position is actually the direction vector
 	vec3 lightDir = normalize(-light.position.xyz);
 
 	vec3 lightIntensity = light.color.xyz * light.color.w;

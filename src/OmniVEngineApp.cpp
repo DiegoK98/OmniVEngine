@@ -1,3 +1,4 @@
+#include "OmniVUtils.hpp"
 #include "OmniVEngineApp.hpp"
 #include "OmniVBuffer.hpp"
 #include "OmniVKeyboardMovementController.hpp"
@@ -13,7 +14,6 @@
 #include <pugixml.hpp>
 
 // std
-#include <array>
 #include <cassert>
 #include <chrono>
 #include <stdexcept>
@@ -108,10 +108,10 @@ namespace OmniV {
 				updateLights(frameInfo, ubo);
 
 				// Matrix from light's point of view (directional lights only)
-				glm::mat4 depthProjectionMatrix = glm::ortho(-SHADOWMAP_SIZE, SHADOWMAP_SIZE, -SHADOWMAP_SIZE, SHADOWMAP_SIZE, Z_NEAR, Z_FAR);
-				glm::mat4 depthViewMatrix = glm::lookAt(glm::vec3(-ubo.lights[0].position), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+				glm::mat4 depthViewMatrix = glm::lookAt(camera.getPosition() + glm::vec3(-ubo.lights[0].position), camera.getPosition(), glm::vec3(0.0f, -1.0f, 0.0f));
+				glm::mat4 depthProjMatrix = glm::ortho(-97.0f, 2.0f, -76.0f, 76.0f, 0.1f, 100.0f);
 
-				ubo.depthBiasMat = depthProjectionMatrix * depthViewMatrix;
+				ubo.depthBiasMat = OmniV::shadowmapAdjustedMatrix(depthViewMatrix, camera, omnivRenderer.getAspectRatio());
 
 				// Upload UBOs
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
