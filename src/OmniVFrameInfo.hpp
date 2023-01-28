@@ -24,7 +24,7 @@ namespace OmniV {
 		glm::mat4 viewMat{ 1.f };
 		glm::mat4 inverseViewMat{ 1.f };
 		glm::mat4 projMat{ 1.f };
-		glm::mat4 depthBiasMat{ 1.f };
+		glm::mat4 lightSpaceMat{ 1.f };
 		glm::vec4 ambientLight{ 1.f, 1.f, 1.f, .02f };  // w is intensity
 		Light lights[MAX_LIGHTS];
 		int numLights;

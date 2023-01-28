@@ -12,7 +12,7 @@ namespace OmniV {
 		(hashCombine(seed, rest), ...);
 	};
 
-	glm::mat4 shadowmapAdjustedMatrix(glm::mat4 viewMat, const OmniVCamera& camera, float aspectRatio);
+	glm::mat4 shadowmapAdjustedSpaceMat(glm::mat4 viewMat, const OmniVCamera& camera, float aspectRatio);
 
 	// from: https://cplusplus.com/forum/beginner/275937/
 	inline void print_mat4(glm::mat4 matrix) {

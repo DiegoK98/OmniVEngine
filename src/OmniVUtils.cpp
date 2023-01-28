@@ -5,7 +5,7 @@ namespace OmniV {
 	// Function that adjusts the boundaries of the shadowmap depth pass view matrix to fit the main camera frustum
 	// Only used for directional lights
 	// from: https://gamedev.stackexchange.com/questions/193929/how-to-move-the-shadow-map-with-the-camera
-	glm::mat4 shadowmapAdjustedMatrix(glm::mat4 viewMat, const OmniVCamera& camera, float aspectRatio) {
+	glm::mat4 shadowmapAdjustedSpaceMat(glm::mat4 viewMat, const OmniVCamera& camera, float aspectRatio) {
 		float fov = camera.getFovY();
 		float nearDist = camera.getNear();
 		float farDist = SHADOWMAP_MAX_DIST;
@@ -33,7 +33,7 @@ namespace OmniV {
 
 		glm::vec3 frustumCenter = (centerFar - centerNear) * 0.5f;
 
-		std::array<glm::vec3, 8> frustumToLightView
+		std::array<glm::vec3, 8> frustumBoundsLightSpace
 		{
 			viewMat * glm::vec4(bottomRightNear, 1.0f),
 			viewMat * glm::vec4(topRightNear, 1.0f),
@@ -48,21 +48,21 @@ namespace OmniV {
 		// find max and min points to define a ortho matrix around
 		glm::vec3 min{ INFINITY, INFINITY, INFINITY };
 		glm::vec3 max{ -INFINITY, -INFINITY, -INFINITY };
-		for (unsigned int i = 0; i < frustumToLightView.size(); i++)
+		for (unsigned int i = 0; i < frustumBoundsLightSpace.size(); i++)
 		{
-			if (frustumToLightView[i].x < min.x)
-				min.x = frustumToLightView[i].x;
-			if (frustumToLightView[i].y < min.y)
-				min.y = frustumToLightView[i].y;
-			if (frustumToLightView[i].z < min.z)
-				min.z = frustumToLightView[i].z;
+			if (frustumBoundsLightSpace[i].x < min.x)
+				min.x = frustumBoundsLightSpace[i].x;
+			if (frustumBoundsLightSpace[i].y < min.y)
+				min.y = frustumBoundsLightSpace[i].y;
+			if (frustumBoundsLightSpace[i].z < min.z)
+				min.z = frustumBoundsLightSpace[i].z;
 
-			if (frustumToLightView[i].x > max.x)
-				max.x = frustumToLightView[i].x;
-			if (frustumToLightView[i].y > max.y)
-				max.y = frustumToLightView[i].y;
-			if (frustumToLightView[i].z > max.z)
-				max.z = frustumToLightView[i].z;
+			if (frustumBoundsLightSpace[i].x > max.x)
+				max.x = frustumBoundsLightSpace[i].x;
+			if (frustumBoundsLightSpace[i].y > max.y)
+				max.y = frustumBoundsLightSpace[i].y;
+			if (frustumBoundsLightSpace[i].z > max.z)
+				max.z = frustumBoundsLightSpace[i].z;
 		}
 
 		float l = min.x;
@@ -73,8 +73,6 @@ namespace OmniV {
 		// towards us so need to set it as the near plane flipped same for min.z.
 		float n = -max.z;
 		float f = -min.z;
-
-		std::cout << "L:" << l << ", R:" << r << ", B:" << b << ", T:" << t << ", N:" << n << ", F:" << f << std::endl;
 
 		// finally, set our ortho projection
 		// and create the light space view-projection matrix

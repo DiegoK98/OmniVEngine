@@ -18,7 +18,7 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
 	mat4 viewMat;
 	mat4 invViewMat;
 	mat4 projMat;
-	mat4 depthBiasMat;
+	mat4 lightSpaceMat;
 	vec4 ambientLightColor; // w is intensity
 	Light lights[10];
 	int numLights;
