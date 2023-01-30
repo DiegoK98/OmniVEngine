@@ -60,12 +60,10 @@ float shadowFunc(vec4 fragPosLS, vec2 offset)
 // Same as above but with filtering applied for smoother shadows
 float shadowFuncPCF(vec4 fragPosLS)
 {
-	fragPosLS = fragPosLS / fragPosLS.w;
-
 	ivec2 texDim = textureSize(shadowMap, 0);
 	float scale = 1.0;
-	float dx = scale * 1.0 / float(texDim.x);
-	float dy = scale * 1.0 / float(texDim.y);
+	float dx = scale / float(texDim.x);
+	float dy = scale / float(texDim.y);
 
 	float shadowFactor = 0.0;
 	int count = 0;
