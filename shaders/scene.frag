@@ -8,7 +8,7 @@ layout(location = 3) in vec4 fragPosView;
 layout(location = 0) out vec4 outColor;
 
 // todo: pass via specialization constant
-#define DEBUG_CASCADES 1
+#define DEBUG_CASCADES 0
 #define SHADOW_MAP_CASCADE_COUNT 4
 #define MAX_LIGHTS 10
 
