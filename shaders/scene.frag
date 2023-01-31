@@ -8,6 +8,7 @@ layout(location = 3) in vec4 fragPosView;
 layout(location = 0) out vec4 outColor;
 
 // todo: pass via specialization constant
+#define DEBUG_CASCADES 1
 #define SHADOW_MAP_CASCADE_COUNT 4
 #define MAX_LIGHTS 10
 
@@ -215,13 +216,16 @@ void main() {
 	outColor = vec4(fragColor * shade(), 1.0);
 
 	// Debugging
-	//if(fragRadialDepth < ubo.cascadeSplits[0]) {
-	//	outColor *= vec4(1.0, 0.0, 0.0, 1.0);
-	//} else if(fragRadialDepth < ubo.cascadeSplits[1]) {
-	//	outColor *= vec4(1.0, 1.0, 0.0, 1.0);
-	//} else if(fragRadialDepth < ubo.cascadeSplits[2]) {
-	//	outColor *= vec4(0.0, 1.0, 0.0, 1.0);
-	//} else if(fragRadialDepth < ubo.cascadeSplits[3]) {
-	//	outColor *= vec4(0.0, 0.0, 1.0, 1.0);
-	//}
+#if (DEBUG_CASCADES == 1)
+	if(fragRadialDepth < ubo.cascadeSplits[0]) {
+		outColor *= vec4(1.0, 0.0, 0.0, 1.0);
+	} else if(fragRadialDepth < ubo.cascadeSplits[1]) {
+		outColor *= vec4(1.0, 1.0, 0.0, 1.0);
+	} else if(fragRadialDepth < ubo.cascadeSplits[2]) {
+		outColor *= vec4(0.0, 1.0, 0.0, 1.0);
+	} else if(fragRadialDepth < ubo.cascadeSplits[3]) {
+		outColor *= vec4(0.0, 0.0, 1.0, 1.0);
+	}
+
+#endif
 }

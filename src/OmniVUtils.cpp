@@ -76,25 +76,16 @@ namespace OmniV {
 				viewMat * glm::vec4(topLeftFar, 1.0f)
 			};
 
-			// find max and min points to define a ortho matrix around
-			glm::vec3 min{ INFINITY, INFINITY, INFINITY };
-			glm::vec3 max{ -INFINITY, -INFINITY, -INFINITY };
-			for (unsigned int i = 0; i < frustumBoundsLightSpace.size(); i++)
-			{
-				if (frustumBoundsLightSpace[i].x < min.x)
-					min.x = frustumBoundsLightSpace[i].x;
-				if (frustumBoundsLightSpace[i].y < min.y)
-					min.y = frustumBoundsLightSpace[i].y;
-				if (frustumBoundsLightSpace[i].z < min.z)
-					min.z = frustumBoundsLightSpace[i].z;
-
-				if (frustumBoundsLightSpace[i].x > max.x)
-					max.x = frustumBoundsLightSpace[i].x;
-				if (frustumBoundsLightSpace[i].y > max.y)
-					max.y = frustumBoundsLightSpace[i].y;
-				if (frustumBoundsLightSpace[i].z > max.z)
-					max.z = frustumBoundsLightSpace[i].z;
+			// find extent of the frustum to define an ortho matrix around
+			float radius = 0.0f;
+			for (uint32_t i = 0; i < 8; i++) {
+				float distance = glm::length(frustumBoundsLightSpace[i] - frustumCenter);
+				radius = glm::max(radius, distance);
 			}
+			radius = std::ceil(radius * 16.0f) / 16.0f;
+
+			glm::vec3 max = glm::vec3(radius);
+			glm::vec3 min = -max;
 
 			float l = min.x;
 			float r = max.x;
