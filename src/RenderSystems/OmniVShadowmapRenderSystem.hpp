@@ -13,6 +13,8 @@ namespace OmniV {
 
 		void render(FrameInfo& frameInfo) override;
 
+		uint32_t activeCascadeIndex = 0;
+
 	private:
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout) override;
 		void createPipeline(PipelineConfigInfo& pipelineConfig, const std::string& vertFilepath, const std::string& fragFilepath = "") override;

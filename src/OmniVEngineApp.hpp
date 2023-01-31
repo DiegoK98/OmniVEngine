@@ -5,7 +5,7 @@
 #include "OmniVGameObject.hpp"
 #include "OmniVWindow.hpp"
 #include "OmniVRenderer.hpp"
-#include "OmniVOffscreenRenderer.hpp"
+#include "OmniVShadowmapRenderer.hpp"
 #include "OmniVCamera.hpp"
 #include "OmniVFrameInfo.hpp"
 
@@ -43,7 +43,7 @@ namespace OmniV {
 		OmniVWindow omnivWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		OmniVDevice omnivDevice{ omnivWindow };
 		OmniVRenderer omnivRenderer{ omnivWindow, omnivDevice };
-		OmniVOffscreenRenderer omnivShadowmapRenderer{ omnivDevice, omnivRenderer };
+		OmniVShadowmapRenderer omnivShadowmapRenderer{ omnivDevice, omnivRenderer };
 
 		// Note: Order of declarations matters -> We want the DescriptorPool object to be destroyed before the Device object
 		// (objects are created in declaration order & destroyed in reverse declaration order)

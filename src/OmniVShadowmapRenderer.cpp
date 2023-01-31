@@ -1,4 +1,4 @@
-#include "OmniVOffscreenRenderer.hpp"
+#include "OmniVShadowmapRenderer.hpp"
 
 // std
 #include <array>
@@ -7,25 +7,26 @@
 
 namespace OmniV {
 
-	OmniVOffscreenRenderer::OmniVOffscreenRenderer(OmniVDevice& device, OmniVRenderer& renderer)
+	OmniVShadowmapRenderer::OmniVShadowmapRenderer(OmniVDevice& device, OmniVRenderer& renderer)
 		: omnivDevice{ device }, omnivRenderer{ renderer } {
-		createShadowmapResources();
-		createShadowmapRenderPass();
+		createResources();
+		createRenderPass();
 	}
 
-	OmniVOffscreenRenderer::~OmniVOffscreenRenderer() { 
+	OmniVShadowmapRenderer::~OmniVShadowmapRenderer() { 
 		vkDestroySampler(omnivDevice.device(), shadowmapSampler, nullptr);
 
-		vkDestroyFramebuffer(omnivDevice.device(), shadowmapDepthFramebuffer, nullptr);
+		for (uint32_t i = 0; i < SHADOWMAP_CASCADE_COUNT; i++)
+			vkDestroyFramebuffer(omnivDevice.device(), depthFramebuffers[i], nullptr);
 
-		vkDestroyImageView(omnivDevice.device(), shadowmapDepthImageView, nullptr);
-		vkDestroyImage(omnivDevice.device(), shadowmapDepthImage, nullptr);
-		vkFreeMemory(omnivDevice.device(), shadowmapDepthImageMemory, nullptr);
+		vkDestroyImageView(omnivDevice.device(), depthImageView, nullptr);
+		vkDestroyImage(omnivDevice.device(), depthImage, nullptr);
+		vkFreeMemory(omnivDevice.device(), depthImageMemory, nullptr);
 
-		vkDestroyRenderPass(omnivDevice.device(), shadowmapRenderPass, nullptr);
+		vkDestroyRenderPass(omnivDevice.device(), renderPass, nullptr);
 	}
 
-	void OmniVOffscreenRenderer::beginShadowmapRenderPass(VkCommandBuffer commandBuffer) {
+	void OmniVShadowmapRenderer::beginShadowmapRenderPass(VkCommandBuffer commandBuffer, uint32_t cascadeIndex) {
 		assert(omnivRenderer.isFrameInProgress() && "Can't call beginShadowmapRenderPass if frame is not in progress");
 		assert(commandBuffer == omnivRenderer.getCurrentCommandBuffer() && "Can't begin render pass on command buffer from a different frame");
 
@@ -35,7 +36,7 @@ namespace OmniV {
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = getShadowmapRenderPass();
-		renderPassInfo.framebuffer = getShadowmapFrameBuffer();
+		renderPassInfo.framebuffer = getFrameBuffer(cascadeIndex);
 
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = getShadowmapExtent();
@@ -61,13 +62,14 @@ namespace OmniV {
 		vkCmdSetDepthBias(commandBuffer, 1.25f, 0.0f, 1.75f);
 	}
 
-	void OmniVOffscreenRenderer::endShadowmapRenderPass(VkCommandBuffer commandBuffer) {
+	void OmniVShadowmapRenderer::endCurrentRenderPass(VkCommandBuffer commandBuffer) {
 		assert(omnivRenderer.isFrameInProgress() && "Can't call endSwapChainRenderPass if frame is not in progress");
 		assert(commandBuffer == omnivRenderer.getCurrentCommandBuffer() && "Can't end render pass on command buffer from a different frame");
+
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void OmniVOffscreenRenderer::createShadowmapResources() {
+	void OmniVShadowmapRenderer::createResources() {
 		// Shadowmap depth buffer
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -76,7 +78,7 @@ namespace OmniV {
 		imageInfo.extent.height = SHADOWMAP_RES;
 		imageInfo.extent.depth = 1;
 		imageInfo.mipLevels = 1;
-		imageInfo.arrayLayers = 1;
+		imageInfo.arrayLayers = SHADOWMAP_CASCADE_COUNT;
 		imageInfo.format = findDepthFormat();
 		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
@@ -85,21 +87,41 @@ namespace OmniV {
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.flags = 0;
 
-		omnivDevice.createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, shadowmapDepthImage, shadowmapDepthImageMemory);
+		omnivDevice.createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
 
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image = shadowmapDepthImage;
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.image = depthImage;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D_ARRAY;
 		viewInfo.format = findDepthFormat();
 		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 		viewInfo.subresourceRange.baseMipLevel = 0;
 		viewInfo.subresourceRange.levelCount = 1;
 		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = 1;
+		viewInfo.subresourceRange.layerCount = SHADOWMAP_CASCADE_COUNT;
 
-		if (vkCreateImageView(omnivDevice.device(), &viewInfo, nullptr, &shadowmapDepthImageView) != VK_SUCCESS) {
+		if (vkCreateImageView(omnivDevice.device(), &viewInfo, nullptr, &depthImageView) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create texture image view!");
+		}
+
+		// One image per cascade
+		for (uint32_t i = 0; i < SHADOWMAP_CASCADE_COUNT; i++) {
+			// Image view for this cascade's layer (inside the depth map)
+			// This view is used to render to that specific depth image layer
+			VkImageViewCreateInfo viewInfo{};
+			viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			viewInfo.image = depthImage;
+			viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			viewInfo.format = findDepthFormat();
+			viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+			viewInfo.subresourceRange.baseMipLevel = 0;
+			viewInfo.subresourceRange.levelCount = 1;
+			viewInfo.subresourceRange.baseArrayLayer = i;
+			viewInfo.subresourceRange.layerCount = 1;
+
+			if (vkCreateImageView(omnivDevice.device(), &viewInfo, nullptr, &cascadesDepthImageViews[i]) != VK_SUCCESS) {
+				throw std::runtime_error("failed to create texture image view!");
+			}
 		}
 
 		// Create sampler to sample from to depth attachment
@@ -123,7 +145,7 @@ namespace OmniV {
 		}
 	}
 
-	void OmniVOffscreenRenderer::createShadowmapRenderPass() {
+	void OmniVShadowmapRenderer::createRenderPass() {
 		// Attachments
 		VkAttachmentDescription depthAttachment{};
 		depthAttachment.format = findDepthFormat();
@@ -173,26 +195,29 @@ namespace OmniV {
 		renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
 		renderPassInfo.pDependencies = dependencies.data();
 
-		if (vkCreateRenderPass(omnivDevice.device(), &renderPassInfo, nullptr, &shadowmapRenderPass) != VK_SUCCESS) {
+		if (vkCreateRenderPass(omnivDevice.device(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create render pass!");
 		}
 
 		// Create shadowmap depth FBO
-		VkFramebufferCreateInfo framebufferInfo = {};
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = shadowmapRenderPass;
-		framebufferInfo.attachmentCount = 1;
-		framebufferInfo.pAttachments = &shadowmapDepthImageView;
-		framebufferInfo.width = SHADOWMAP_RES;
-		framebufferInfo.height = SHADOWMAP_RES;
-		framebufferInfo.layers = 1;
+		// One framebuffer per cascade
+		for (uint32_t i = 0; i < SHADOWMAP_CASCADE_COUNT; i++) {
+			VkFramebufferCreateInfo framebufferInfo = {};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = renderPass;
+			framebufferInfo.attachmentCount = 1;
+			framebufferInfo.pAttachments = &cascadesDepthImageViews[i];
+			framebufferInfo.width = SHADOWMAP_RES;
+			framebufferInfo.height = SHADOWMAP_RES;
+			framebufferInfo.layers = 1;
 
-		if (vkCreateFramebuffer(omnivDevice.device(), &framebufferInfo, nullptr, &shadowmapDepthFramebuffer) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create framebuffer!");
+			if (vkCreateFramebuffer(omnivDevice.device(), &framebufferInfo, nullptr, &depthFramebuffers[i]) != VK_SUCCESS) {
+				throw std::runtime_error("failed to create framebuffer!");
+			}
 		}
 	}
 
-	VkFormat OmniVOffscreenRenderer::findDepthFormat() {
+	VkFormat OmniVShadowmapRenderer::findDepthFormat() {
 		return omnivDevice.findSupportedFormat(
 			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
 			VK_IMAGE_TILING_OPTIMAL,

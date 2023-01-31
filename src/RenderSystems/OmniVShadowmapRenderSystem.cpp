@@ -16,6 +16,7 @@ namespace OmniV {
 	struct SimplePushConstantData {
 		glm::mat4 modelMat{ 1.f };
 		glm::mat4 normalMat{ 1.f };
+		uint32_t cascadeIndex = 0;
 	};
 
 	OmniVShadowmapRenderSystem::OmniVShadowmapRenderSystem(OmniVDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
@@ -82,6 +83,7 @@ namespace OmniV {
 			SimplePushConstantData push{};
 			push.modelMat = obj.transform.mat4();
 			push.normalMat = obj.transform.normalMatrix();
+			push.cascadeIndex = activeCascadeIndex;
 
 			vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 

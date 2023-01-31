@@ -5,6 +5,11 @@
 
 namespace OmniV {
 
+	struct CascadesGroup {
+		std::array<float, SHADOWMAP_CASCADE_COUNT> splitDepths;
+		std::array<glm::mat4, SHADOWMAP_CASCADE_COUNT> viewProjMats;
+	};
+
 	// from: https://stackoverflow.com/a/57595105
 	template <typename T, typename... Rest>
 	void hashCombine(std::size_t& seed, const T& v, const Rest&... rest) {
@@ -12,7 +17,7 @@ namespace OmniV {
 		(hashCombine(seed, rest), ...);
 	};
 
-	glm::mat4 shadowmapAdjustedSpaceMat(glm::mat4 viewMat, const OmniVCamera& camera, float aspectRatio);
+	CascadesGroup shadowmapCascadesMatrices(glm::mat4 viewMat, const OmniVCamera& camera, float aspectRatio);
 
 	// from: https://cplusplus.com/forum/beginner/275937/
 	inline void print_mat4(glm::mat4 matrix) {

@@ -6,6 +6,9 @@
 // lib
 #include <vulkan/vulkan.h>
 
+//std
+#include <array>
+
 namespace OmniV {
 
 	enum LightType {
@@ -24,7 +27,8 @@ namespace OmniV {
 		glm::mat4 viewMat{ 1.f };
 		glm::mat4 inverseViewMat{ 1.f };
 		glm::mat4 projMat{ 1.f };
-		glm::mat4 lightSpaceMat{ 1.f };
+		std::array<glm::mat4, SHADOWMAP_CASCADE_COUNT> cascadesMats;
+		std::array<float, SHADOWMAP_CASCADE_COUNT> cascadeSplits;
 		glm::vec4 ambientLight{ 1.f, 1.f, 1.f, .02f };  // w is intensity
 		Light lights[MAX_LIGHTS];
 		int numLights;

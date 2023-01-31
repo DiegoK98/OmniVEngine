@@ -18,7 +18,7 @@ namespace OmniV {
         OmniVRenderer(const OmniVRenderer&) = delete;
         OmniVRenderer& operator=(const OmniVRenderer&) = delete;
 
-        VkRenderPass getSwapChainRenderPass() const { return omnivSwapChain->getRenderPass(); }
+        VkRenderPass getRenderPass() const { return omnivSwapChain->getRenderPass(); }
 
         float getAspectRatio() const { return omnivSwapChain->extentAspectRatio(); }
         bool isFrameInProgress() const { return isFrameStarted; }
@@ -35,8 +35,8 @@ namespace OmniV {
 
         VkCommandBuffer beginFrame();
         void endFrame();
-        void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
-        void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
+        void beginRenderPass(VkCommandBuffer commandBuffer);
+        void endRenderPass(VkCommandBuffer commandBuffer);
 
     private:
         void createCommandBuffers();

@@ -23,6 +23,8 @@
 
 #define SHADOWMAP_RES 2048
 #define SHADOWMAP_MAX_DIST 20
+#define SHADOWMAP_CASCADE_COUNT 4
+#define SHADOWMAP_CASCADE_LAMBDA 0.95f
 
 // Should be an input from the scene or something
 // The actual proper way to do it would be to add behaviours/scripts that the user will create

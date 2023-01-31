@@ -66,10 +66,10 @@ namespace OmniV {
 		// Shadowmap system is separated from the rest because we want to render shadowmaps in a different render pass than everything else
 		OmniVShadowmapRenderSystem shadowmapRenderSystem{ omnivDevice, omnivShadowmapRenderer.getShadowmapRenderPass(), globalSetLayout->getDescriptorSetLayout() };
 
-		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+		OmniVSimpleRenderSystem simpleRenderSystem{ omnivDevice, omnivRenderer.getRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 		if (enabledSystems.simpleRenderSystemEnable) renderSystems[0] = &simpleRenderSystem;
 
-		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+		OmniVPointLightRenderSystem pointLightSystem{ omnivDevice, omnivRenderer.getRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 		if (enabledSystems.pointLightRenderSystemEnable) renderSystems[1] = &pointLightSystem;
 
 		// Create player controller
@@ -110,27 +110,33 @@ namespace OmniV {
 				// Matrix from light's point of view (directional lights only)
 				glm::mat4 lightViewMat = glm::lookAt(camera.getPosition() + glm::vec3(-ubo.lights[0].position), camera.getPosition(), glm::vec3(0.0f, -1.0f, 0.0f));
 
-				ubo.lightSpaceMat = OmniV::shadowmapAdjustedSpaceMat(lightViewMat, camera, omnivRenderer.getAspectRatio());
+				auto cascades = OmniV::shadowmapCascadesMatrices(lightViewMat, camera, omnivRenderer.getAspectRatio());
+
+				ubo.cascadesMats = cascades.viewProjMats;
+				ubo.cascadeSplits = cascades.splitDepths;
 
 				// Upload UBOs
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
-				// Offscreen render pass
-				omnivShadowmapRenderer.beginShadowmapRenderPass(commandBuffer);
+				// Shadowmap render passes
+				for (uint32_t i = 0; i < SHADOWMAP_CASCADE_COUNT; i++)
+				{
+					omnivShadowmapRenderer.beginShadowmapRenderPass(commandBuffer, i);
 
-				// Render all shadowmaps
-				shadowmapRenderSystem.render(frameInfo);
+					shadowmapRenderSystem.activeCascadeIndex = i;
+					shadowmapRenderSystem.render(frameInfo);
 
-				omnivShadowmapRenderer.endShadowmapRenderPass(commandBuffer);
+					omnivShadowmapRenderer.endCurrentRenderPass(commandBuffer);
+				}
 
-				// Scene render pass
-				omnivRenderer.beginSwapChainRenderPass(commandBuffer);
+				// Swapchain render pass
+				omnivRenderer.beginRenderPass(commandBuffer);
 
 				for (unsigned i = 0; i < enabledSystems.getCount(); i++)
 					renderSystems[i]->render(frameInfo);
 
-				omnivRenderer.endSwapChainRenderPass(commandBuffer);
+				omnivRenderer.endRenderPass(commandBuffer);
 
 				omnivRenderer.endFrame();
 			}
