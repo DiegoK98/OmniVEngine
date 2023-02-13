@@ -1,4 +1,4 @@
-﻿#include "OmniVEngineApp.hpp"
+﻿#include "EngineApp.hpp"
 
 // std
 #include <cstdlib>
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
 	else
 		sceneFile = "testScene.xml"; // Default scene to load if no argument given
 
-	OmniV::OmniVEngineApp app{};
+	OmniV::EngineApp app{};
 
 	try {
 		app.loadScene(sceneFile);

@@ -50,7 +50,7 @@
   </light>
 
   <!--Other lights-->
-  <!-- <light type="point">
+  <light type="point">
     <radiance value="1.0 0.1 0.1"/>
     <intensity value="0.2"/>
     <billboard enabled="true"/>
@@ -102,6 +102,6 @@
     <transform>
       <position value="-1.366 -0.3 0.366"/>
     </transform>
-  </light> -->
+  </light>
 
 </scene>
