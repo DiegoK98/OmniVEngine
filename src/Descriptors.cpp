@@ -2,17 +2,12 @@
 
 // std
 #include <cassert>
-#include <stdexcept>
 
 namespace OmniV {
 
 	// *************** Descriptor Set Layout Builder *********************
 
-	DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(
-		uint32_t binding,
-		VkDescriptorType descriptorType,
-		VkShaderStageFlags stageFlags,
-		uint32_t count) {
+	DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(uint32_t binding, VkDescriptorType descriptorType, VkShaderStageFlags stageFlags, uint32_t count) {
 		assert(m_bindings.count(binding) == 0 && "Binding already in use");
 		VkDescriptorSetLayoutBinding layoutBinding{};
 		layoutBinding.binding = binding;
@@ -29,11 +24,10 @@ namespace OmniV {
 
 	// *************** Descriptor Set Layout *********************
 
-	DescriptorSetLayout::DescriptorSetLayout(
-		Device& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
+	DescriptorSetLayout::DescriptorSetLayout(Device& device, std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings)
 		: m_device{ device }, m_bindings{ bindings } {
 		std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
-		for (auto kv : bindings) {
+		for (auto& kv : bindings) {
 			setLayoutBindings.push_back(kv.second);
 		}
 
@@ -42,11 +36,7 @@ namespace OmniV {
 		descriptorSetLayoutInfo.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
 		descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
-		if (vkCreateDescriptorSetLayout(
-			device.device(),
-			&descriptorSetLayoutInfo,
-			nullptr,
-			&m_descriptorSetLayout) != VK_SUCCESS) {
+		if (vkCreateDescriptorSetLayout(device.device(), &descriptorSetLayoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create descriptor set layout!");
 		}
 	}
@@ -57,14 +47,12 @@ namespace OmniV {
 
 	// *************** Descriptor Pool Builder *********************
 
-	DescriptorPool::Builder& DescriptorPool::Builder::addPoolSize(
-		VkDescriptorType descriptorType, uint32_t count) {
+	DescriptorPool::Builder& DescriptorPool::Builder::addPoolSize(VkDescriptorType descriptorType, uint32_t count) {
 		m_poolSizes.push_back({ descriptorType, count });
 		return *this;
 	}
 
-	DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(
-		VkDescriptorPoolCreateFlags flags) {
+	DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(VkDescriptorPoolCreateFlags flags) {
 		m_poolFlags = flags;
 		return *this;
 	}
@@ -79,11 +67,7 @@ namespace OmniV {
 
 	// *************** Descriptor Pool *********************
 
-	DescriptorPool::DescriptorPool(
-		Device& device,
-		uint32_t maxSets,
-		VkDescriptorPoolCreateFlags poolFlags,
-		const std::vector<VkDescriptorPoolSize>& poolSizes)
+	DescriptorPool::DescriptorPool(Device& device, uint32_t maxSets, VkDescriptorPoolCreateFlags poolFlags, const std::vector<VkDescriptorPoolSize>& poolSizes)
 		: m_device{ device } {
 		VkDescriptorPoolCreateInfo descriptorPoolInfo{};
 		descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -133,15 +117,12 @@ namespace OmniV {
 	DescriptorWriter::DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool)
 		: m_setLayout{ setLayout }, m_pool{ pool } {}
 
-	DescriptorWriter& DescriptorWriter::writeBuffer(
-		uint32_t binding, VkDescriptorBufferInfo* bufferInfo) {
+	DescriptorWriter& DescriptorWriter::writeBuffer(uint32_t binding, VkDescriptorBufferInfo* bufferInfo) {
 		assert(m_setLayout.m_bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
 		auto& bindingDescription = m_setLayout.m_bindings[binding];
 
-		assert(
-			bindingDescription.descriptorCount == 1 &&
-			"Binding single descriptor info, but binding expects multiple");
+		assert(bindingDescription.descriptorCount == 1 && "Binding single descriptor info, but binding expects multiple");
 
 		VkWriteDescriptorSet write{};
 		write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

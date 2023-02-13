@@ -1,8 +1,5 @@
 #include "GameObject.hpp"
 
-// std
-#include <stdexcept>
-
 namespace OmniV {
 
 	glm::mat4 TransformComponent::mat4() {
@@ -92,7 +89,7 @@ namespace OmniV {
 	}
 
 	GameObject GameObject::makeSimpleDirectionalLight(glm::vec3 direction, glm::vec3 color, float intensity) {
-		GameObject gameObj = GameObject::createGameObject();
+		auto gameObj = GameObject::createGameObject();
 
 		gameObj.m_color = color;
 		gameObj.m_directionalLight = std::make_unique<DirectionalLightComponent>();
@@ -103,7 +100,7 @@ namespace OmniV {
 	}
 
 	GameObject GameObject::makeSimplePointLight(bool drawBillboard, glm::vec3 color, float intensity, float radius) {
-		GameObject gameObj = GameObject::createGameObject();
+		auto gameObj = GameObject::createGameObject();
 
 		gameObj.m_color = color;
 		gameObj.m_pointLight = std::make_unique<PointLightComponent>();
@@ -146,7 +143,7 @@ namespace OmniV {
 
 			float light_radius = lightNode.child("radius") ? toFloat(lightNode.child("radius").attribute("value").value()) : 0.1f;
 
-			GameObject gameObj = makeSimplePointLight(drawBillboard, m_radiance, light_intensity, light_radius);
+			auto gameObj = makeSimplePointLight(drawBillboard, m_radiance, light_intensity, light_radius);
 			gameObj.m_transform.initializeFromNode(lightNode.child("transform"));
 
 			return gameObj;

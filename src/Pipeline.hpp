@@ -2,10 +2,6 @@
 
 #include "Device.hpp"
 
-// std
-#include <string>
-#include <vector>
-
 namespace OmniV {
 
 	struct PipelineConfigInfo {

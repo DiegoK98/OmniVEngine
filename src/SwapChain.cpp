@@ -1,13 +1,9 @@
 #include "SwapChain.hpp"
 
 // std
-#include <array>
 #include <cstdlib>
 #include <cstring>
-#include <iostream>
 #include <limits>
-#include <set>
-#include <stdexcept>
 
 namespace OmniV {
 
@@ -16,8 +12,7 @@ namespace OmniV {
 		init();
 	}
 
-	SwapChain::SwapChain(
-		Device& device, VkExtent2D extent, std::shared_ptr<SwapChain> previous)
+	SwapChain::SwapChain(Device& device, VkExtent2D extent, std::shared_ptr<SwapChain> previous)
 		: m_device{ device }, m_viewExtent{ extent }, m_oldSwapChain{ previous } {
 		init();
 		m_oldSwapChain = nullptr;
@@ -407,19 +402,19 @@ namespace OmniV {
 		const std::vector<VkPresentModeKHR>& availablePresentModes) {
 		for (const auto& availablePresentMode : availablePresentModes) {
 			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-				std::cout << "Present mode: Mailbox" << std::endl;
+				LOG("Present mode: Mailbox");
 				return availablePresentMode;
 			}
 		}
 
 		/*for (const auto& availablePresentMode : availablePresentModes) {
 			if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
-				std::cout << "Present mode: Immediate" << std::endl;
+				LOG("Present mode: Immediate");
 				return availablePresentMode;
 			}
 		}*/
 
-		std::cout << "Present mode: V-Sync" << std::endl;
+		LOG("Present mode: V-Sync");
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 

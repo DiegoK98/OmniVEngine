@@ -5,9 +5,6 @@
 // std
 #include <cassert>
 #include <fstream>
-#include <iostream>
-#include <stdexcept>
-#include <vector>
 
 namespace OmniV {
 
@@ -46,10 +43,10 @@ namespace OmniV {
 		assert(configInfo.stagesCount > 0 && "Cannot create graphics pipeline: stagesCount has to be at least 1");
 		assert(configInfo.stagesCount < 3 && "Cannot create graphics pipeline: stagesCount cannot be higher than 2");
 		
-		createShaderModule(readFile(WORKING_DIR "shaders/" + vertFilepath), &m_vertShaderModule);
+		createShaderModule(readFile("shaders/" + vertFilepath), &m_vertShaderModule);
 
 		if (configInfo.stagesCount == 2)
-			createShaderModule(readFile(WORKING_DIR "shaders/" + fragFilepath), &m_fragShaderModule);
+			createShaderModule(readFile("shaders/" + fragFilepath), &m_fragShaderModule);
 
 		VkPipelineShaderStageCreateInfo shaderStages[2];
 

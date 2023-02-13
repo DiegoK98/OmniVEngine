@@ -7,20 +7,16 @@
 #include "RenderSystems/PointLightRenderSystem.hpp"
 
 // libs
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
 #include <pugixml.hpp>
 
 // std
 #include <cassert>
 #include <chrono>
-#include <stdexcept>
 
 namespace OmniV {
 
 	EngineApp::EngineApp() {
+		// Build descriptor pool
 		m_globalPool = DescriptorPool::Builder(m_device)
 			.setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -45,11 +41,13 @@ namespace OmniV {
 		shadowmapImageInfo.imageView = m_shadowmapRenderer.getShadowmapImageView();
 		shadowmapImageInfo.imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL;
 
+		// Build descriptor set layout
 		auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
+		// Build actual descriptor sets
 		std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < globalDescriptorSets.size(); i++) {
 			auto globalBufferInfo = uboBuffers[i]->descriptorInfo();
@@ -78,17 +76,18 @@ namespace OmniV {
 			renderSystems.emplace_back(std::make_unique<PointLightRenderSystem>(m_device, m_renderer.getRenderPass(), globalSetLayout->getDescriptorSetLayout()));
 
 		// Create player controller
-		KeyboardMovementController viewerController{};
+		KeyboardMovementController viewerController;
 
 		// Main loop
 		auto currentTime = std::chrono::high_resolution_clock::now();
+
 		while (!m_window.shouldClose()) {
 
 			glfwPollEvents(); // Process all pending events (window related)
 
 			// Time management
-			auto newTime = std::chrono::high_resolution_clock::now();
-			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			const auto newTime = std::chrono::high_resolution_clock::now();
+			const float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
 			currentTime = newTime;
 
 			// Player movement & rotation
@@ -102,9 +101,9 @@ namespace OmniV {
 				int frameIndex = m_renderer.getFrameIndex();
 				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, m_camera, globalDescriptorSets[frameIndex], m_gameObjects };
 
-				// Update UBO
-				GlobalUbo ubo{};
+				GlobalUbo ubo;
 
+				// Update UBO
 				ubo.viewMat = m_camera.getView();
 				ubo.inverseViewMat = m_camera.getInverseView();
 				ubo.projMat = m_camera.getProjection();
@@ -115,10 +114,7 @@ namespace OmniV {
 				// Matrix from light's point of view (directional lights only)
 				glm::mat4 lightViewMat = glm::lookAt(m_camera.getPosition() + glm::vec3(-ubo.lights[0].position), m_camera.getPosition(), glm::vec3(0.0f, -1.0f, 0.0f));
 
-				auto cascades = OmniV::shadowmapCascadesMatrices(lightViewMat, m_camera, m_renderer.getAspectRatio());
-
-				ubo.cascadesMats = cascades.viewProjMats;
-				ubo.cascadeSplits = cascades.splitDepths;
+				getCascadeMatrices(lightViewMat, m_camera, m_renderer.getAspectRatio(), ubo.cascadesMats, ubo.cascadeSplits);
 
 				// Upload UBOs
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
@@ -129,8 +125,11 @@ namespace OmniV {
 				{
 					m_shadowmapRenderer.beginShadowmapRenderPass(commandBuffer, i);
 
-					shadowmapRenderSystem->m_activeCascadeIndex = i;
-					shadowmapRenderSystem->render(frameInfo);
+					if (shadowmapRenderSystem)
+					{
+						shadowmapRenderSystem->m_activeCascadeIndex = i;
+						shadowmapRenderSystem->render(frameInfo);
+					}
 
 					m_shadowmapRenderer.endCurrentRenderPass(commandBuffer);
 				}
@@ -152,7 +151,7 @@ namespace OmniV {
 	}
 
 	void EngineApp::loadScene(const std::string& sceneFile) {
-		std::string scenePath = WORKING_DIR "scenes/" + sceneFile;
+		std::string scenePath = "scenes/" + sceneFile;
 
 		pugi::xml_document doc;
 
@@ -165,7 +164,7 @@ namespace OmniV {
 
 		///// Checks before parsing /////
 		// Scene
-		size_t count = std::distance(doc.children("scene").begin(), doc.children("scene").end());
+		size_t count = std::distance(doc.children("scene").begin(), doc.children("scene").end()); // Count of scene nodes
 
 		if (count == 0)
 			throw std::runtime_error("No scene defined");
@@ -173,7 +172,7 @@ namespace OmniV {
 			throw std::runtime_error("Multiple scenes are not allowed");
 
 		// Render Settings
-		count = std::distance(sceneNode.children("rendersettings").begin(), sceneNode.children("rendersettings").end());
+		count = std::distance(sceneNode.children("rendersettings").begin(), sceneNode.children("rendersettings").end()); // Count of rendersettings nodes
 
 		if (count == 0)
 			throw std::runtime_error("No render settings defined");
@@ -181,7 +180,7 @@ namespace OmniV {
 			throw std::runtime_error("Multiple rendersettings not allowed");
 
 		// Camera
-		count = std::distance(sceneNode.children("camera").begin(), sceneNode.children("camera").end());
+		count = std::distance(sceneNode.children("camera").begin(), sceneNode.children("camera").end()); // Count of camera nodes
 
 		if (count == 0)
 			throw std::runtime_error("No camera defined");

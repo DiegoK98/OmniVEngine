@@ -1,11 +1,9 @@
 ﻿#include "EngineApp.hpp"
 
-// std
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
-
 int main(int argc, char* argv[]) {
+	// This path is not generic. Can't find a proper solution
+	std::filesystem::current_path("D:/Documents/OmniVEngine/");
+
 	if (argc > 2)
 	{
 		std::cerr << "Invalid number of arguments" << std::endl;
@@ -13,20 +11,20 @@ int main(int argc, char* argv[]) {
 	}
 
 	std::string sceneFile;
-	if (argc != 1)
+	if (argc == 2)
 		sceneFile = std::string(argv[1]);
 	else
 		sceneFile = "testScene.xml"; // Default scene to load if no argument given
 
-	OmniV::EngineApp app{};
+	OmniV::EngineApp app;
 
 	try {
 		app.loadScene(sceneFile);
 		app.run();
 	}
 	catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
-		// std::cerr << "Invalid arguments: Expected *.xml file as only argument" << std::endl; // For when loadScene throws exception
+		LOGERROR(e.what());
+		// LOGERROR("Invalid arguments: Expected *.xml file as only argument"); // For when loadScene throws exception
 		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;

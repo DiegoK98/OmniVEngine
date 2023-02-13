@@ -6,8 +6,6 @@
 
 // std
 #include <cassert>
-#include <memory>
-#include <vector>
 
 namespace OmniV {
     class Renderer {
@@ -45,7 +43,7 @@ namespace OmniV {
 
         Window& m_window;
         Device& m_device;
-        std::unique_ptr<SwapChain> m_swapChain;
+        std::unique_ptr<SwapChain> m_swapChain = nullptr;
         std::vector<VkCommandBuffer> m_commandBuffers;
 
         uint32_t m_currentImageIndex;

@@ -9,10 +9,6 @@
 #include "Camera.hpp"
 #include "FrameInfo.hpp"
 
-// std
-#include <memory>
-#include <vector>
-
 namespace OmniV {
 
 	struct EnabledRenderSystems
@@ -45,10 +41,10 @@ namespace OmniV {
 
 		// Note: Order of declarations matters -> We want the DescriptorPool object to be destroyed before the Device object
 		// (objects are created in declaration order & destroyed in reverse declaration order)
-		std::unique_ptr<DescriptorPool> m_globalPool{};
+		std::unique_ptr<DescriptorPool> m_globalPool;
 		GameObject::Map m_gameObjects; // Should be part of a scene object
 
-		Camera m_camera{};
+		Camera m_camera;
 		RenderSettings m_renderSettings;
 
 		EnabledRenderSystems m_enabledSystems;

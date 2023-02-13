@@ -7,10 +7,7 @@
 #include <glm/gtc/constants.hpp>
 
 // std
-#include <array>
 #include <cassert>
-#include <map>
-#include <stdexcept>
 
 namespace OmniV {
 
@@ -79,15 +76,7 @@ namespace OmniV {
 
 		m_pipeline->bind(frameInfo.commandBuffer);
 
-		vkCmdBindDescriptorSets(
-			frameInfo.commandBuffer,
-			VK_PIPELINE_BIND_POINT_GRAPHICS,
-			m_pipelineLayout,
-			0,
-			1,
-			&frameInfo.globalDescriptorSet,
-			0,
-			nullptr);
+		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
 
 		// iterate through sorted lights in reverse order
 		for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
@@ -99,13 +88,7 @@ namespace OmniV {
 			push.color = glm::vec4(obj.m_color, obj.m_pointLight->lightIntensity);
 			push.radius = obj.m_transform.scale.x;
 
-			vkCmdPushConstants(
-				frameInfo.commandBuffer,
-				m_pipelineLayout,
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(PointLightPushConstants),
-				&push);
+			vkCmdPushConstants(frameInfo.commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PointLightPushConstants), &push);
 
 			vkCmdDraw(frameInfo.commandBuffer, 6, 1, 0, 0);
 		}

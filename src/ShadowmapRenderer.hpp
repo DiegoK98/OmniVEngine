@@ -6,8 +6,6 @@
 
 // std
 #include <cassert>
-#include <memory>
-#include <vector>
 
 namespace OmniV {
     class ShadowmapRenderer {

@@ -2,9 +2,6 @@
 
 // std headers
 #include <cstring>
-#include <iostream>
-#include <set>
-#include <unordered_set>
 
 namespace OmniV {
 
@@ -116,7 +113,7 @@ namespace OmniV {
         if (deviceCount == 0) {
             throw std::runtime_error("failed to find GPUs with Vulkan support!");
         }
-        std::cout << "Device count: " << deviceCount << std::endl;
+        LOG("Device count: " << deviceCount);
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
 
@@ -132,7 +129,7 @@ namespace OmniV {
         }
 
         vkGetPhysicalDeviceProperties(m_physicalDevice, &m_properties);
-        std::cout << "physical device: " << m_properties.deviceName << std::endl;
+        LOG("physical device: " << m_properties.deviceName);
     }
 
     void Device::createLogicalDevice() {
@@ -283,17 +280,17 @@ namespace OmniV {
         std::vector<VkExtensionProperties> extensions(extensionCount);
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-        std::cout << "available extensions:" << std::endl;
+        LOG("available extensions:");
         std::unordered_set<std::string> available;
         for (const auto& extension : extensions) {
-            std::cout << "\t" << extension.extensionName << std::endl;
+            LOG("\t" << extension.extensionName);
             available.insert(extension.extensionName);
         }
 
-        std::cout << "required extensions:" << std::endl;
+        LOG("required extensions:");
         auto requiredExtensions = getRequiredExtensions();
         for (const auto& required : requiredExtensions) {
-            std::cout << "\t" << required << std::endl;
+            LOG("\t" << required);
             if (available.find(required) == available.end()) {
                 throw std::runtime_error("Missing required glfw extension");
             }

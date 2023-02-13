@@ -1,8 +1,5 @@
 #include "Camera.hpp"
 
-// libs
-#include "pugixml.hpp"
-
 // std
 #include <cassert>
 #include <limits>
@@ -137,7 +134,7 @@ namespace OmniV {
 	}
 
 	Camera Camera::loadCameraFromNode(pugi::xml_node i_camera_node) {
-		auto camera = Camera{};
+		Camera camera;
 
 		if (strcmp(i_camera_node.attribute("type").value(), "perspective") == 0)
 		{

@@ -1,12 +1,12 @@
 #pragma once
 
-// I am sure this could be more generic with environment variables or something
-#define WORKING_DIR "D:/Documents/OmniVEngine/"
+// Could use precompiled headers
 
 // libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 // std
 #include <algorithm>
@@ -15,8 +15,20 @@
 #include <stdexcept>
 #include <array>
 #include <vector>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <memory>
+#include <string>
 #include <functional>
+#include <filesystem>
 
+// logs
+#define LOG(x) std::cout << x << std::endl
+#define LOGERROR(x) std::cerr << x << std::endl
+
+// global consts
 #define MAX_LIGHTS 10
 #define MAX_GAME_OBJECTS 10000
 #define MAX_CONCURRENT_RENDER_SYSTEMS 10
@@ -29,7 +41,7 @@
 // Should be an input from the scene or something
 // The actual proper way to do it would be to add behaviours/scripts that the user will create
 // and attach to objects in a component system like Unity
-#define ROTATE_LIGHTS 0
+#define ROTATE_LIGHTS 1
 
 namespace OmniV
 {

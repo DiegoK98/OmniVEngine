@@ -35,7 +35,7 @@ namespace OmniV {
 
 	std::unique_ptr<Model> Model::createModelFromFile(Device& device, const std::string& filepath) {
 		Builder builder{};
-		builder.loadModel(WORKING_DIR "models/" + filepath);
+		builder.loadModel("models/" + filepath);
 		return std::make_unique<Model>(device, builder);
 	}
 

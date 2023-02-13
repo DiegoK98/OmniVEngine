@@ -7,9 +7,7 @@
 #include <glm/gtc/constants.hpp>
 
 // std
-#include <array>
 #include <cassert>
-#include <stdexcept>
 
 namespace OmniV {
 

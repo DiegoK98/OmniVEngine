@@ -1,8 +1,5 @@
 #include "Window.hpp"
 
-// std
-#include <stdexcept>
-
 namespace OmniV {
 
 	Window::Window(int w, int h, std::string name) : m_width{ w }, m_height{ h }, m_windowName{ name } {

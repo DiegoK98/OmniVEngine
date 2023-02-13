@@ -2,11 +2,6 @@
 
 #include "Device.hpp"
 
-// std
-#include <memory>
-#include <unordered_map>
-#include <vector>
-
 namespace OmniV {
 
     class DescriptorSetLayout {
@@ -36,7 +31,7 @@ namespace OmniV {
 
     private:
         Device& m_device;
-        VkDescriptorSetLayout m_descriptorSetLayout;
+        VkDescriptorSetLayout m_descriptorSetLayout = nullptr;
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> m_bindings;
 
         friend class DescriptorWriter;

@@ -2,10 +2,6 @@
 
 #include "Window.hpp"
 
-// std
-#include <string>
-#include <vector>
-
 namespace OmniV {
 
 	struct SwapChainSupportDetails {
@@ -25,7 +21,7 @@ namespace OmniV {
 	class Device {
 	public:
 #ifdef NDEBUG
-		const bool enableValidationLayers = false;
+		const bool m_enableValidationLayers = false;
 #else
 		const bool m_enableValidationLayers = true;
 #endif

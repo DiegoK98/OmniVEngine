@@ -5,9 +5,6 @@
 
 #include "common.hpp"
 
-// std
-#include <string>
-
 namespace OmniV {
 
 	class Window {

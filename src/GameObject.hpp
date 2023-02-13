@@ -1,15 +1,9 @@
 ﻿#pragma once
 
-#include "common.hpp"
 #include "Model.hpp"
 
 // libs
-#include <glm/gtc/matrix_transform.hpp>
 #include <pugixml.hpp>
-
-// std
-#include <memory>
-#include <unordered_map>
 
 namespace OmniV {
 
@@ -45,7 +39,7 @@ namespace OmniV {
 
         static GameObject createGameObject() {
             static id_t currentId = 0;
-            return GameObject{ currentId++ };
+            return GameObject(currentId++);
         }
 
         static GameObject makeSimpleDirectionalLight(glm::vec3 direction, glm::vec3 color = glm::vec3(1.f), float intensity = 5.f);
@@ -63,9 +57,9 @@ namespace OmniV {
         TransformComponent m_transform{};
 
         // Optional pointer components
-        std::shared_ptr<Model> m_model{};
-        std::unique_ptr<DirectionalLightComponent> m_directionalLight = nullptr;
-        std::unique_ptr<PointLightComponent> m_pointLight = nullptr;
+        std::shared_ptr<Model> m_model;
+        std::unique_ptr<DirectionalLightComponent> m_directionalLight;
+        std::unique_ptr<PointLightComponent> m_pointLight;
 
     private:
         GameObject(id_t objId) : m_objectID{ objId } {}

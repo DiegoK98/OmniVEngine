@@ -150,11 +150,7 @@ namespace OmniV {
 	 * @return VkDescriptorBufferInfo of specified offset and range
 	 */
 	VkDescriptorBufferInfo Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) {
-		return VkDescriptorBufferInfo{
-			m_buffer,
-			offset,
-			size,
-		};
+		return VkDescriptorBufferInfo{ m_buffer, offset, size, };
 	}
 
 	/**

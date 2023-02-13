@@ -2,13 +2,8 @@
 
 #include "Device.hpp"
 
-// vulkan headers
+// libs
 #include <vulkan/vulkan.h>
-
-// std lib headers
-#include <memory>
-#include <string>
-#include <vector>
 
 namespace OmniV {
 
@@ -75,7 +70,7 @@ namespace OmniV {
 		VkExtent2D m_viewExtent;
 
 		VkSwapchainKHR m_swapChain;
-		std::shared_ptr<SwapChain> m_oldSwapChain;
+		std::shared_ptr<SwapChain> m_oldSwapChain = nullptr;
 
 		std::vector<VkSemaphore> m_imageAvailableSemaphores;
 		std::vector<VkSemaphore> m_renderFinishedSemaphores;
