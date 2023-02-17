@@ -29,8 +29,8 @@
     #define OV_DEBUG_LOG(x) std::cout << x << std::endl
     #define OV_DEBUG_ERROR(x) std::cerr << x << std::endl
 #else
-    #define LOG(x)
-    #define LOGERROR(x)
+    #define OV_DEBUG_LOG(x)
+    #define OV_DEBUG_ERROR(x)
 #endif
 
 // global consts

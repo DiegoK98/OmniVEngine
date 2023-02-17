@@ -11,7 +11,7 @@ namespace OmniV {
 		createRenderPass();
 	}
 
-	ShadowmapRenderer::~ShadowmapRenderer() { 
+	ShadowmapRenderer::~ShadowmapRenderer() {
 		vkDestroySampler(m_device.device(), m_shadowmapSampler, nullptr);
 
 		for (uint32_t i = 0; i < SHADOWMAP_CASCADE_COUNT; i++)
@@ -216,9 +216,7 @@ namespace OmniV {
 	}
 
 	VkFormat ShadowmapRenderer::findDepthFormat() {
-		return m_device.findSupportedFormat(
-			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+		return m_device.findSupportedFormat({ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 	}
 }
