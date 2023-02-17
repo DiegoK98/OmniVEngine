@@ -25,8 +25,13 @@
 #include <filesystem>
 
 // logs
-#define LOG(x) std::cout << x << std::endl
-#define LOGERROR(x) std::cerr << x << std::endl
+#ifndef NDEBUG
+    #define OV_DEBUG_LOG(x) std::cout << x << std::endl
+    #define OV_DEBUG_ERROR(x) std::cerr << x << std::endl
+#else
+    #define LOG(x)
+    #define LOGERROR(x)
+#endif
 
 // global consts
 #define MAX_LIGHTS 10

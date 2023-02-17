@@ -402,7 +402,7 @@ namespace OmniV {
 		const std::vector<VkPresentModeKHR>& availablePresentModes) {
 		for (const auto& availablePresentMode : availablePresentModes) {
 			if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-				LOG("Present mode: Mailbox");
+				OV_DEBUG_LOG("Present mode: Mailbox");
 				return availablePresentMode;
 			}
 		}
@@ -414,7 +414,7 @@ namespace OmniV {
 			}
 		}*/
 
-		LOG("Present mode: V-Sync");
+		OV_DEBUG_LOG("Present mode: V-Sync");
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
 

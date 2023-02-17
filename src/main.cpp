@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
 		app.run();
 	}
 	catch (const std::exception& e) {
-		LOGERROR(e.what());
+		OV_DEBUG_ERROR(e.what());
 		// LOGERROR("Invalid arguments: Expected *.xml file as only argument"); // For when loadScene throws exception
 		return EXIT_FAILURE;
 	}
